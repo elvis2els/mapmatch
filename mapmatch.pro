@@ -35,7 +35,8 @@ HEADERS += \
     sutil/simple_progress.hpp
 
 DISTFILES += \
-    sutil/README.md
+    sutil/README.md \
+    Readme.md
 
 INCLUDEPATH += /usr/include/mysql
 LIBS += -lshp -lmysqlpp -lboost_system -lboost_filesystem -lboost_program_options -lboost_thread -lboost_date_time

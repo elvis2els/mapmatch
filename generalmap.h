@@ -388,7 +388,7 @@ bool Map::load(std::string const& shp,  Picker picker, Checker checker){
     int n_road = DBFGetRecordCount(helper.hDbf);    //获取路段数量
     roadsegment_.reserve(n_road);   //roadsegment_是一个路段vector
     for(int i = 0; i < n_road; ++i){
-        SHPObject* linestring = SHPReadObject(helper.hShp, i);
+        SHPObject* linestring = SHPReadObject(helper.hShp, i);  //获取第i条路段
         RoadSegment r;
         int n = linestring->nVertices;  //路网节点数
         r.geometry.reserve(n);
