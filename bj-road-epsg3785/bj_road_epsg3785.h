@@ -27,6 +27,7 @@ struct BJRoadEpsg3785CrossIDChecker{
 };
 
 struct BJRoadEpsg3785IDPicker{
+    //下面这些都是对应信息在dbf表中对应的列的位置
     const static int FrontCrossIDField = 18;
     const static int BackCrossIDField = 19;
     const static int IDField = 2;
@@ -36,7 +37,7 @@ struct BJRoadEpsg3785IDPicker{
         std::string ID = DBFReadStringAttribute(handle, roadIndex, IDField);
         int direction = atoi(DBFReadStringAttribute(handle, roadIndex, DirectionField));
         int path_class = atoi(DBFReadStringAttribute(handle, roadIndex, PathClassField));
-        double speed = 30 / 3.6;
+        double speed = 30 / 3.6;    // m/s
         switch(path_class){
             case 4:
                 speed = 70 / 3.6;
@@ -57,6 +58,7 @@ struct BJRoadEpsg3785IDPicker{
         }
         return dir;
     }
+    /* 将路口ID加入properties中  */
     void pick_cross(CrossPosInRoad pos, pt::ptree& properties, DBFHandle handle, int roadIndex){
         int Field = pos == Front ? FrontCrossIDField : BackCrossIDField;
         std::string id = DBFReadStringAttribute(handle, roadIndex, Field);

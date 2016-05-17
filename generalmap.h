@@ -49,7 +49,7 @@ struct RoadSegment{
     int start_cross_index;
     int end_cross_index;
     Direction direction;
-    Linestring geometry;
+    Linestring geometry;    //存储路段每个点的xy值
     pt::ptree properties;///< user stored properties
     //std::unordered_map<string, boost::any> properties;
 };
@@ -391,17 +391,17 @@ bool Map::load(std::string const& shp,  Picker picker, Checker checker){
         SHPObject* linestring = SHPReadObject(helper.hShp, i);  //获取第i条路段
         RoadSegment r;
         int n = linestring->nVertices;  //路网节点数
-        r.geometry.reserve(n);
+        r.geometry.reserve(n);  //geometry是多个点组成的vector的linestring
         for(int i = 0; i < n; ++i){
             r.geometry.push_back({linestring->padfX[i], linestring->padfY[i]});
         }
         SHPDestroyObject(linestring);
-        r.direction = picker.pick_roadsegment(r.properties, helper.hDbf, i);
+        r.direction = picker.pick_roadsegment(r.properties, helper.hDbf, i);    //求得路段是s->d,d->s,s<->d,同时properties得到speed和sid信息
 
         Point s = r.geometry.front();
         Point e = r.geometry.back();
         unsigned int startIndex, endIndex;
-        if ( checker.cross_is_new(Front, s, r, helper.hDbf, i) ){
+        if ( checker.cross_is_new(Front, s, r, helper.hDbf, i) ){   //判断路段起始对应路口是否已遍历过
             Cross front;
             front.geometry = s;
             picker.pick_cross(Front, front.properties, helper.hDbf, i);
