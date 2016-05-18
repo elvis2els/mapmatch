@@ -20,7 +20,7 @@ struct ProjectPoint{
     double param;
 };
 
-BOOST_GEOMETRY_REGISTER_POINT_2D_GET_SET(ProjectPoint, double, bg::cs::cartesian, geometry.x, geometry.y, geometry.x, geometry.y);
+BOOST_GEOMETRY_REGISTER_POINT_2D_GET_SET(ProjectPoint, double, bg::cs::cartesian, geometry.x, geometry.y, geometry.x, geometry.y)
 
 ProjectPoint make_project_point(Point const& point, RoadSegment const& r);
 inline ProjectPoint make_project_point_for_cross(Cross const& c){
@@ -84,7 +84,7 @@ public:
 
     template<typename Picker = BJRoadEpsg3785IDPicker, typename Checker = BJRoadEpsg3785CrossIDChecker>
     bool load(std::string const& shpFile, Picker picker = Picker(), Checker checker = Checker()){
-        bool succ = Map::load(shpFile, picker, checker);
+        bool succ = Map::load(shpFile, picker, checker);    //读路口和路段，建立路口路段索引
         if ( ! succ ){
             return false;
         }

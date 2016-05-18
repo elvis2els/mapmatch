@@ -350,7 +350,7 @@ private:
     std::unordered_map<std::string, b::any> roadsegment_property_index_;
     std::vector<RoadSegment> roadsegment_;
     std::vector<Cross> cross_;
-    std::vector<std::vector<RoadIndexCrossIndexPair> >successor_road_;
+    std::vector<std::vector<RoadIndexCrossIndexPair> >successor_road_;   //每个路口存放位置和cross_相同，存放以该路口为起点的路段索引和相应end路口索引
     std::vector<std::vector<RoadIndexCrossIndexPair> >predecessor_road_;
     std::unordered_multimap<int, GraphTraits::edge_descriptor> road_edge_map_;
 };
@@ -404,10 +404,10 @@ bool Map::load(std::string const& shp,  Picker picker, Checker checker){
         if ( checker.cross_is_new(Front, s, r, helper.hDbf, i) ){   //判断路段起始对应路口是否已遍历过
             Cross front;
             front.geometry = s;
-            picker.pick_cross(Front, front.properties, helper.hDbf, i);
-            startIndex = front.index = cross_.size();
+            picker.pick_cross(Front, front.properties, helper.hDbf, i); //将起始路口ID加入properties中
+            startIndex = front.index = cross_.size();   //索引是存在corss_中的位置
             cross_.push_back(std::move(front));
-            checker.store_index(Front, s, startIndex, r, helper.hDbf, i);
+            checker.store_index(Front, s, startIndex, r, helper.hDbf, i);   //路口ID存入IDIndexMap
         }else{
             startIndex = checker.get_index(Front, s, r, helper.hDbf, i);
         }

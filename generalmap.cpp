@@ -6,21 +6,21 @@ using namespace std;
 void Map::index_(){
     cross_rtree = PointRTree(bgi::dynamic_quadratic(cross_.size()));
     for(auto& c : cross_){
-        cross_rtree.insert({c.geometry, c.index});
+        cross_rtree.insert({c.geometry, c.index});  //将所有路口号存入cross_rtree
     }
 
 
     roadsegment_rtree = RoadSegmentRTree(bgi::dynamic_quadratic(roadsegment_.size()));
     for(auto& r : roadsegment_){
-        Box bx = bg::return_envelope<Box>(r.geometry);
+        Box bx = bg::return_envelope<Box>(r.geometry);  // 返回包含路段的矩形
         roadsegment_rtree.insert(make_pair(std::move(bx), r.index));
     }
 
     predecessor_road_.resize(cross_.size());
     successor_road_.resize(cross_.size());
     for(auto& r : roadsegment_){
-        if ( r.direction & Forward ){
-            successor_road_[r.start_cross_index].push_back({r.index, r.end_cross_index});
+        if ( r.direction & Forward ){   //1&1  3&1
+            successor_road_[r.start_cross_index].push_back({r.index, r.end_cross_index}); //start路口后续路段，路段索引、end路口索引
             predecessor_road_[r.end_cross_index].push_back({r.index, r.start_cross_index});
         }
         if ( r.direction & Backward ){
@@ -32,7 +32,7 @@ void Map::index_(){
 
 void Map::build_graph(){
     for(int i = 0; i < cross_.size(); ++i){
-        b::add_vertex(graph);   //b = boost
+        b::add_vertex(graph);   //b = boost 添加路口节点，仅有节点没有路段
     }
 
     GraphTraits::edge_descriptor edge;
