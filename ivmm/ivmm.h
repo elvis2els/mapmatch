@@ -15,7 +15,7 @@ class GpsPoint;
 struct Candidate{
     ProjectPoint point;///< 投影点
     int vote;///< 投票
-    double fvalue;///< ivmm论文中的favlue
+    double fvalue;///< ivmm论文中的fvalue
 };
 
 ///\brief IVMM算法参数

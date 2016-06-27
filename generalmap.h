@@ -20,7 +20,8 @@
 namespace bgi = boost::geometry::index;
 namespace pt = boost::property_tree;
 /// \brief cross in map
-struct Cross{
+struct Cross
+{
     int index;
     Point geometry;
     pt::ptree properties;///< user stored properties
@@ -30,7 +31,8 @@ BOOST_GEOMETRY_REGISTER_POINT_2D_GET_SET(Cross, double , bg::cs::cartesian, geom
 
 /// \file
 /// \brief direction of road segment
-enum  Direction{
+enum  Direction
+{
     Forward = 1,///< r.s->r.e
     Backward = 2,///< r.e->r.s
     Bidirection = 3,///< both r.s->r.e and r.e->r.s
@@ -38,13 +40,15 @@ enum  Direction{
 
 /// \file
 /// \brief cross posistion in road segment
-enum CrossPosInRoad{
+enum CrossPosInRoad
+{
     Front,///< point is r.s
     Back///< point is r.e
 };
 
 /// \brief road segment
-struct RoadSegment{
+struct RoadSegment
+{
     int index;
     int start_cross_index;
     int end_cross_index;
@@ -55,21 +59,26 @@ struct RoadSegment{
 };
 
 /// \brief 通过几何来判断顶点是否添加
-/// 
+///
 /// Checker通过 cross_is_new 判断路口是否是新的,
 /// 若路口是新的则会通过 store_index 存储该点对应的索引
 /// 若路口已经添加过,则通过 get_index 获取路口的索引<br/>
 /// 默认路口检查器
-struct GeometryChecker{
+struct GeometryChecker
+{
 private:
-    struct PointHash{
-        size_t operator()(Point const& p)const{
+    struct PointHash
+    {
+        size_t operator()(Point const& p)const
+        {
             std::hash<double> hasher;
             return hasher(p.x()) ^ ( hasher(p.y()) << 1 );
         }
     };
-    struct PointEqual{
-        bool operator()(Point const& a, Point const& b)const{
+    struct PointEqual
+    {
+        bool operator()(Point const& a, Point const& b)const
+        {
             return a.x() == b.x() && a.y() == b.y();
         }
     };
@@ -83,7 +92,8 @@ public:
     /// \param[in] handle DBFHandle
     /// \param[in] road_index 道路对应的索引
     /// \return  是否是未添加索引的点
-    inline bool cross_is_new(CrossPosInRoad /*pos*/, Point const& p, RoadSegment const& /*r*/, DBFHandle /*handle*/, int /*road_index*/){
+    inline bool cross_is_new(CrossPosInRoad /*pos*/, Point const& p, RoadSegment const& /*r*/, DBFHandle /*handle*/, int /*road_index*/)
+    {
         return saved.count(p) == 0;
     }
 
@@ -94,7 +104,8 @@ public:
     /// \param[in] r   路口所连的路段
     /// \param[in] handle DBFHandle
     /// \param[in] road_index 道路对应的索引
-    inline void store_index(CrossPosInRoad /*pos*/, Point const& p, int cross_index, RoadSegment const& /*r*/, DBFHandle /*handle*/, int /*road_index*/){
+    inline void store_index(CrossPosInRoad /*pos*/, Point const& p, int cross_index, RoadSegment const& /*r*/, DBFHandle /*handle*/, int /*road_index*/)
+    {
         saved[p] = cross_index;
 
     }
@@ -106,7 +117,8 @@ public:
     /// \param[in] handle DBFHandle
     /// \param[in] road_index 道路对应的索引
     /// \return 路口的索引
-    inline int get_index(CrossPosInRoad /*pos*/, Point const& p, RoadSegment const& /*r*/, DBFHandle /*handle*/, int /*road_index*/){
+    inline int get_index(CrossPosInRoad /*pos*/, Point const& p, RoadSegment const& /*r*/, DBFHandle /*handle*/, int /*road_index*/)
+    {
         return saved[p];
     }
 };
@@ -115,52 +127,65 @@ public:
 ///
 /// 什么也不做的属性选取器,总是返回双向道路<br/>
 /// 默认属性选取器
-struct NoPropertiesPicker{
+struct NoPropertiesPicker
+{
     /// \brief 选取道路的额外属性
     /// \param[out] properties 存储额外的道路属性
     /// \param[in] handle DBFHandle
     /// \param[in] road_index 道路索引
     /// \return Direction 道路的方向
-    inline Direction pick_roadsegment(pt::ptree & /*properties*/, DBFHandle /*handle*/, int /*road_index*/){return Bidirection;}
+    inline Direction pick_roadsegment(pt::ptree & /*properties*/, DBFHandle /*handle*/, int /*road_index*/)
+    {
+        return Bidirection;
+    }
 
     /// \brief 选取路口的额外属性
     /// \param[out] properties 存储额外的路口属性
     /// \param[in] pos 路口对应在道路的位置
     /// \param[in] handle DBFHandle
     /// \param[in] road_index 道路的索引
-    inline void pick_cross(pt::ptree & /*properties*/, CrossPosInRoad /*pos*/,  DBFHandle /*handle*/, int /*road_index*/){}
+    inline void pick_cross(pt::ptree & /*properties*/, CrossPosInRoad /*pos*/,  DBFHandle /*handle*/, int /*road_index*/) {}
 };
 
-struct RoadIndexCrossIndexPair : std::pair<int, int>{
-    RoadIndexCrossIndexPair()=default;
-    RoadIndexCrossIndexPair(int r, int c){
+struct RoadIndexCrossIndexPair : std::pair<int, int>
+{
+    RoadIndexCrossIndexPair() = default;
+    RoadIndexCrossIndexPair(int r, int c)
+    {
         first = r;
         second = c;
     }
-    int road_index()const{
+    int road_index()const
+    {
         return this->first;
     }
-    int cross_index()const{
+    int cross_index()const
+    {
         return this->second;
     }
-    void set_road_index(int idx){
+    void set_road_index(int idx)
+    {
         this->first = idx;
     }
-    void set_cross_index(int idx){
+    void set_cross_index(int idx)
+    {
         this->second = idx;
     }
 };
 
 template<typename PropertyValueType>
-struct PropertyIndexMap{
+struct PropertyIndexMap
+{
     typedef std::unordered_map<typename CharSequenceToStringElseNoChange<PropertyValueType>::type, int> type;
 };
 
 /// \brief 道路地图
-class Map{
+class Map
+{
 public:
 
-    Map()noexcept:roadsegment_rtree(bgi::dynamic_quadratic(1)),cross_rtree(bgi::dynamic_quadratic(1)) {}
+Map()noexcept:
+    roadsegment_rtree(bgi::dynamic_quadratic(1)), cross_rtree(bgi::dynamic_quadratic(1)) {}
 
     /// \brief 构建graph
     void build_graph();
@@ -183,7 +208,7 @@ public:
     /// \see cross contain_cross
     template<typename PropertyValueType>
     void map_cross_property(std::string const& property_name);
-    
+
     /// \brief 映射路段属性到索引
     /// \param[in] property_name 要映射的属性名字
     /// \param typename PropertyValueType 属性对应的数据类型
@@ -194,7 +219,8 @@ public:
     void map_roadsegment_property(std::string const& property_name);
 
     /// \brief 通过索引查询路口是否存在
-    inline bool contain_cross(int index)const{
+    inline bool contain_cross(int index)const
+    {
         return index >= 0 && index < (int)cross_.size();
     }
 
@@ -203,27 +229,32 @@ public:
     /// \param[in] value 属性值
     /// \see map_cross_property
     template<typename T>
-    inline bool contain_cross(std::string const& property_name, T const& value)const{
+    inline bool contain_cross(std::string const& property_name, T const& value)const
+    {
         typedef typename PropertyIndexMap<T>::type MapType;
         auto iter = cross_property_index_.find(property_name) ;
-        if ( iter != cross_property_index_.end() ){
+        if ( iter != cross_property_index_.end() )
+        {
             return b::any_cast<MapType const&>(iter->second).count(value);
         }
         return false;
     }
 
     ///  \brief 通过索引查询路段是否存在
-    inline bool contain_roadsegment(int index)const{
+    inline bool contain_roadsegment(int index)const
+    {
         return index >= 0 && index < (int)roadsegment_.size();
     }
 
     /// \brief 通过映射过的属性查询路段是否存在
     /// \see mapRoadSegmentProperty
     template<typename T>
-    inline bool contain_roadsegment(std::string const& property_name, T const& value)const{
+    inline bool contain_roadsegment(std::string const& property_name, T const& value)const
+    {
         typedef typename PropertyIndexMap<T>::type MapType;
         auto iter = roadsegment_property_index_.find(property_name) ;
-        if ( iter != roadsegment_property_index_.end() ){
+        if ( iter != roadsegment_property_index_.end() )
+        {
             return b::any_cast<MapType const&>(iter->second).count(value);
         }
         return false;
@@ -231,20 +262,23 @@ public:
 
 
     ///  \brief 获取路口
-    inline Cross const& cross(int index)const{
+    inline Cross const& cross(int index)const
+    {
         return cross_.at(index);
     }
 
     /// \brief 通过属性获得路口
     ///  \see map_cross_property
     template<typename T>
-    inline Cross const& cross(std::string const& property_name, T const& value)const{
+    inline Cross const& cross(std::string const& property_name, T const& value)const
+    {
         typedef typename PropertyIndexMap<T>::type MapType;
         return cross_.at(b::any_cast<MapType const&>(cross_property_index_.at(property_name)).at(value));
     }
 
     /// \brief 获得路段
-    inline RoadSegment const& roadsegment(int index)const{
+    inline RoadSegment const& roadsegment(int index)const
+    {
         return roadsegment_.at(index);
     }
 
@@ -252,7 +286,8 @@ public:
     /// \brief 根据属性值获取路段
     /// \see mapRoadSegmentProperty
     template<typename T>
-    inline RoadSegment const& roadsegment(std::string const& property_name, T const& value)const{
+    inline RoadSegment const& roadsegment(std::string const& property_name, T const& value)const
+    {
         typedef typename PropertyIndexMap<T>::type MapType;
         return roadsegment_.at(b::any_cast<MapType const&>(roadsegment_property_index_.at(property_name)).at(value));
     }
@@ -261,8 +296,9 @@ public:
     typedef bgi::rtree<std::pair<Box, int> , bgi::dynamic_quadratic> RoadSegmentRTree;
     /// 点索引RTree
     typedef bgi::rtree<std::pair<Point, int> , bgi::dynamic_quadratic> PointRTree;
-    
-    struct RoadIndexOfEdgeTag{
+
+    struct RoadIndexOfEdgeTag
+    {
         typedef b::edge_property_tag kind;
     };
     static RoadIndexOfEdgeTag IndexOfEdge;
@@ -293,28 +329,34 @@ public:
     void visit_cross(std::function<void(Cross &)> visitor);
 
     /// \brief 获得驶入道路
-    inline std::vector<RoadIndexCrossIndexPair> const& predecessor_road_of(int cross_index)const{
+    inline std::vector<RoadIndexCrossIndexPair> const& predecessor_road_of(int cross_index)const
+    {
         return predecessor_road_.at(cross_index);
     }
 
 
     /// \brief 获得驶出道路
-    inline std::vector<RoadIndexCrossIndexPair> const& successor_road_of(int cross_index)const{
+    inline std::vector<RoadIndexCrossIndexPair> const& successor_road_of(int cross_index)const
+    {
         return successor_road_.at(cross_index);
     }
 
     /// \brief  获得更具edge获得路段
-    inline RoadSegment const& roadsegment( GraphTraits::edge_descriptor const& edge)const{
+    inline RoadSegment const& roadsegment( GraphTraits::edge_descriptor const& edge)const
+    {
         int roadIdx = b::get(IndexOfEdge, graph, edge);
         return roadsegment_.at(roadIdx);
     }
 
     /// \brief 搜索start->end的路段
-    inline RoadIndexCrossIndexPair find_road_oneway(int start, int end)const{
+    inline RoadIndexCrossIndexPair find_road_oneway(int start, int end)const
+    {
         if ( start > 0 || start < (int)cross_.size())
         {
-            for ( RoadIndexCrossIndexPair  const& p : successor_road_.at(start) ){
-                if ( end == p.cross_index() ){
+            for ( RoadIndexCrossIndexPair  const & p : successor_road_.at(start) )
+            {
+                if ( end == p.cross_index() )
+                {
                     return p;
                 }
             }
@@ -325,24 +367,29 @@ public:
     }
 
     /// \brief 查找start->end或者end->start的路段
-    inline RoadIndexCrossIndexPair findRoadBidrection(int start, int end)const{
+    inline RoadIndexCrossIndexPair findRoadBidrection(int start, int end)const
+    {
         RoadIndexCrossIndexPair rst = find_road_oneway(start, end);
-        if ( rst.road_index() == -1 ){
+        if ( rst.road_index() == -1 )
+        {
             return find_road_oneway(end, start);
         }
         return rst;
     }
 
-    size_t road_size()const{
+    size_t road_size()const
+    {
         return roadsegment_.size();
     }
-    size_t cross_size()const{
+    size_t cross_size()const
+    {
         return cross_.size();
     }
-    size_t edge_size()const{
+    size_t edge_size()const
+    {
         return b::num_edges(graph);
     }
-    virtual ~Map()=default;
+    virtual ~Map() = default;
 
 private:
     void index_();
@@ -357,42 +404,50 @@ private:
 
 
 //template impl
-struct ShpFileOpenHelper{
+struct ShpFileOpenHelper
+{
     SHPHandle hShp;
     DBFHandle hDbf;
-    ShpFileOpenHelper (std::string const& name){
+    ShpFileOpenHelper (std::string const& name)
+    {
         std::string shpFile = name + ".shp";
         std::string dbfFile = name + ".dbf";
         hShp = SHPOpen(shpFile.c_str(), "r");
         hDbf = DBFOpen(dbfFile.c_str(), "r");
     }
 
-    ~ShpFileOpenHelper(){
+    ~ShpFileOpenHelper()
+    {
         if ( hShp ) SHPClose(hShp);
         if ( hDbf ) DBFClose(hDbf);
     }
 
-    inline operator void*(){
+    inline operator void*()
+    {
         return (void*) (hShp && hDbf);
     }
 };
 
 
 template<typename Picker, typename Checker>
-bool Map::load(std::string const& shp,  Picker picker, Checker checker){
+bool Map::load(std::string const& shp,  Picker picker, Checker checker)
+{
     ShpFileOpenHelper helper(shp);
-    if ( ! helper ){
+    if ( ! helper )
+    {
         return false;
     }
 
     int n_road = DBFGetRecordCount(helper.hDbf);    //获取路段数量
     roadsegment_.reserve(n_road);   //roadsegment_是一个路段vector
-    for(int i = 0; i < n_road; ++i){
+    for(int i = 0; i < n_road; ++i)
+    {
         SHPObject* linestring = SHPReadObject(helper.hShp, i);  //获取第i条路段
         RoadSegment r;
         int n = linestring->nVertices;  //路网节点数
         r.geometry.reserve(n);  //geometry是多个点组成的vector的linestring
-        for(int i = 0; i < n; ++i){
+        for(int i = 0; i < n; ++i)
+        {
             r.geometry.push_back({linestring->padfX[i], linestring->padfY[i]});
         }
         SHPDestroyObject(linestring);
@@ -401,25 +456,31 @@ bool Map::load(std::string const& shp,  Picker picker, Checker checker){
         Point s = r.geometry.front();
         Point e = r.geometry.back();
         unsigned int startIndex, endIndex;
-        if ( checker.cross_is_new(Front, s, r, helper.hDbf, i) ){   //判断路段起始对应路口是否已遍历过
+        if ( checker.cross_is_new(Front, s, r, helper.hDbf, i) )    //判断路段起始对应路口是否已遍历过
+        {
             Cross front;
             front.geometry = s;
             picker.pick_cross(Front, front.properties, helper.hDbf, i); //将起始路口ID加入properties中
             startIndex = front.index = cross_.size();   //索引是存在corss_中的位置
             cross_.push_back(std::move(front));
             checker.store_index(Front, s, startIndex, r, helper.hDbf, i);   //路口ID存入IDIndexMap
-        }else{
+        }
+        else
+        {
             startIndex = checker.get_index(Front, s, r, helper.hDbf, i);
         }
 
-        if ( checker.cross_is_new(Back, e, r, helper.hDbf, i) ){
+        if ( checker.cross_is_new(Back, e, r, helper.hDbf, i) )
+        {
             Cross back;
             back.geometry = e;
             picker.pick_cross(Back, back.properties, helper.hDbf, i);
             endIndex = back.index = cross_.size();
             cross_.push_back(std::move(back));
             checker.store_index(Back, e, endIndex, r, helper.hDbf, i);
-        }else{
+        }
+        else
+        {
             endIndex = checker.get_index(Back, e, r, helper.hDbf, i);
         }
 
@@ -434,19 +495,23 @@ bool Map::load(std::string const& shp,  Picker picker, Checker checker){
 }
 
 template<typename PropertyValueType>
-void Map::map_cross_property(std::string const& property_name){
+void Map::map_cross_property(std::string const& property_name)
+{
     typedef typename PropertyIndexMap<PropertyValueType>::type MapType;
     MapType pimap;
-    for(auto& c : cross_){
+    for(auto & c : cross_)
+    {
         pimap[c.properties.get<PropertyValueType>(property_name)] = c.index;
     }
     cross_property_index_.insert({property_name, b::any(std::move(pimap))});
 }
 
 template<typename PropertyValueType>
-void Map::map_roadsegment_property(std::string const& property_name){
+void Map::map_roadsegment_property(std::string const& property_name)
+{
     typename PropertyIndexMap<PropertyValueType>::type pimap;
-    for(auto& r : roadsegment_){
+    for(auto & r : roadsegment_)
+    {
         pimap[r.properties.get<PropertyValueType>(property_name)] = r.index;
     }
     roadsegment_property_index_.insert({property_name, boost::any(std::move(pimap))});

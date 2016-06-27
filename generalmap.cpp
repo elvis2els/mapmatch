@@ -35,7 +35,7 @@ void Map::build_graph(){
         b::add_vertex(graph);   //b = boost 添加路口节点，仅有节点没有路段
     }
 
-    GraphTraits::edge_descriptor edge;
+    GraphTraits::edge_descriptor edge;  //识别图中顶点
     for(auto& r : roadsegment_){
         if ( r.direction & Forward ){
             road_edge_map_.insert({r.index, b::add_edge(r.start_cross_index, r.end_cross_index, r.index,graph).first});

@@ -11,13 +11,22 @@ vector<GpsPoint> load_from_file(std::string const & name){
     double y;
     boost::posix_time::ptime ptime;
     if ( ifs){
-        while ( ifs.ignore(1024, ',') &&
+//        while ( ifs.ignore(1024, ',') &&
+//                ifs >> ptime &&
+//                ifs.ignore(),
+//                ifs.ignore(1024,',') &&
+//                ifs.ignore(1024, ',') &&
+//                ifs >> x && ifs.ignore() &&
+//                ifs >> y){
+//            GpsPoint p(x, y, ptime);
+//            ret.push_back(p);
+//        }
+        while (
                 ifs >> ptime &&
                 ifs.ignore(),
-                ifs.ignore(1024,',') &&
-                ifs.ignore(1024, ',') &&
                 ifs >> x && ifs.ignore() &&
-                ifs >> y){
+                ifs >> y && ifs.ignore() &&
+                ifs.ignore(1024, '\n')){
             GpsPoint p(x, y, ptime);
             ret.push_back(p);
         }
