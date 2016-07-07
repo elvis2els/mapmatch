@@ -231,7 +231,6 @@ double IVMM::find_sequence(
     }
 
     cout<<"FocusOnGps: "<<focusOnGps<<endl;
-    cout<<"gpsBegin: "<<gpsBegin<<endl;
     for(auto n: f)
         cout<< n<< " ";
     cout<<endl;
@@ -251,9 +250,20 @@ double IVMM::find_sequence(
                 double fst = w[srcGps] *
                              n[destGps][destCand] *
                              detail.v * detail.ft;
-                if ( f[srcCand] + fst > maxF )
+                double sum;
+                if(detail.avg_speed > 42)
+                    sum = 0;
+                else
+                    sum = f[srcCand] + fst;
+
+                cout<<"srcGps: "<<srcGps<<"srcCand: "<<srcCand<<" destGps: "<<destGps<<" destCand:"<<destCand<<endl;
+                cout<<"avgSpeed: "<<detail.avg_speed<<" fst: "<<fst<<" maxF:"<<maxF<<" sum:"<<sum<<endl;
+
+//                if ( f[srcCand] + fst > maxF )
+                if (sum > maxF)
                 {
-                    maxF = f[srcCand] + fst;
+//                    maxF = f[srcCand] + fst;
+                    maxF = sum;
                     preCandIdx = srcCand;
                 }
             }

@@ -395,24 +395,27 @@ int main(int argc, char *argv[])
     }
     else
     {
-        b::thread read_thread(b::bind(reader,
-                                      b::ref(inputQueue),
-                                      b::ref(outputQueue)));
+//        b::thread read_thread(b::bind(reader,
+//                                      b::ref(inputQueue),
+//                                      b::ref(outputQueue)));
+        b::thread read_thread(bind(reader, ref(inputQueue), ref(outputQueue)));
         b::thread_group working_threads;
         for (int i = 0; i < j; ++i)
         {
-            working_threads.create_thread(
-                b::bind(working,
-                        b::ref(inputQueue),
-                        b::ref(outputQueue),
-                        b::cref(ivmm),
-                        b::cref(read_done)));
+//            working_threads.create_thread(
+//                b::bind(working,
+//                        b::ref(inputQueue),
+//                        b::ref(outputQueue),
+//                        b::cref(ivmm),
+//                        b::cref(read_done)));
+            working_threads.create_thread(bind(working, ref(inputQueue), ref(outputQueue), cref(ivmm), cref(read_done)));
         }
-        b::thread write_thread(
-            b::bind(writer,
-                    b::ref(outputQueue),
-                    b::cref(bjRoadMap),
-                    b::cref(map_match_done)));
+//        b::thread write_thread(
+//            b::bind(writer,
+//                    b::ref(outputQueue),
+//                    b::cref(bjRoadMap),
+//                    b::cref(map_match_done)));
+        b::thread write_thread(bind(writer, ref(outputQueue), cref(bjRoadMap), cref(map_match_done)));
         read_thread.join();
         read_done = true;
         working_threads.join_all();
