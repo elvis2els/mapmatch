@@ -38,6 +38,7 @@ bool generateDefaultConfigFile(string const& name)
     pt.put("IVMM.candidateLimit", 5);
     pt.put("IVMM.beta", 5000.0);
     pt.put("IVMM.window", 50);
+    pt.put("IVMM.factor", 1.5);
     try
     {
         pt::write_ini(name, pt);
@@ -63,6 +64,7 @@ bool readIVMMParam(string const& name, IVMMParam& param)
         param.candidate_limit = pt.get<int>("IVMM.candidateLimit");
         param.beta = pt.get<double>("IVMM.beta");
         param.window = pt.get<int>("IVMM.window");
+        param.factor = pt.get<double>("IVMM.factor");
     }
     catch(std::exception const& e)
     {
@@ -380,6 +382,7 @@ int main(int argc, char *argv[])
     cout << "IVMM.candidateLimit = " << param.candidate_limit << endl;
     cout << "IVMM.beta = " << param.beta << endl;
     cout << "IVMM.window = " << param.window << endl;
+    cout << "IVMM.factor = " << param.factor << endl;
     IVMM ivmm(&bjRoadMap, param);
     lf::queue<Input*> inputQueue(10000);
     lf::queue<Output*> outputQueue(100);

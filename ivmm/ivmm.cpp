@@ -239,25 +239,36 @@ double IVMM::find_sequence(
     {
         vector<double> newF(candidates[destGps].size());
         int srcGps = destGps - 1;
+        bool hasTurePath = false;       //标记是否有候选点可以在合理速度下到达下一gps候选点
         for(vector<int>::size_type destCand = 0; destCand < candidates[destGps].size(); ++destCand)
         {
             //find max pre candidate for destCand
             double maxF = -oo;
-            int preCandIdx = -1;
+            int preCandIdx = -1;          
             for(vector<double>::size_type srcCand = 0; srcCand < f.size(); ++srcCand)
-            {
+            {                
                 Detail const detail = vft[srcGps][srcCand][destCand];
+
+                cout<<"srcGps: "<<srcGps<<"srcCand: "<<srcCand<<" destGps: "<<destGps<<" destCand:"<<destCand<<endl;
+                cout<<"avg speed: "<<detail.avg_speed<<" weight speedf: "<<detail.weight_speed*param.factor<<endl;
+                if(detail.avg_speed > detail.weight_speed * param.factor)        //忽略真实平均速度速度超过道路加权限速合理范围的点
+                    continue;
+                hasTurePath = true;
+                if(f[srcCand] == -oo)   //忽略不可达的候选点
+                    continue;
+
                 double fst = w[srcGps] *
                              n[destGps][destCand] *
                              detail.v * detail.ft;
-                double sum;
-                if(detail.avg_speed > 42)
-                    sum = 0;
-                else
-                    sum = f[srcCand] + fst;
+                cout<<" fst: "<<fst<<endl;
+                if(detail.avg_speed != 0)   //同一个点的就不要考虑了
+                    if(fst < 1.0e-04)   //忽略边权值太小的候选点
+                        continue;
 
-                cout<<"srcGps: "<<srcGps<<"srcCand: "<<srcCand<<" destGps: "<<destGps<<" destCand:"<<destCand<<endl;
-                cout<<"avgSpeed: "<<detail.avg_speed<<" fst: "<<fst<<" maxF:"<<maxF<<" sum:"<<sum<<endl;
+                double sum;
+                sum = f[srcCand] + fst;
+
+                cout <<" maxF:"<<maxF<<" sum:"<<sum<<endl;
 
 //                if ( f[srcCand] + fst > maxF )
                 if (sum > maxF)
@@ -270,22 +281,59 @@ double IVMM::find_sequence(
             newF[destCand] = maxF;
             pre[destGps - gpsBegin][destCand] = preCandIdx;
         }
-        f = std::move(newF);        //新的f值数组替换掉前一个点的，省空间
+
+        if (b::all(newF, lambda::arg1 == -oo) )
+        {
+            if(hasTurePath)
+                return -1;
+            //由于地图原因导致达不可达点，仅做空间分析
+            cout<<"!hasTurePath"<<endl;
+            for(vector<int>::size_type destCand = 0; destCand < candidates[destGps].size(); ++destCand)
+            {
+                double maxF = -oo;
+                int preCandIdx = -1;
+                for(vector<double>::size_type srcCand = 0; srcCand < f.size(); ++srcCand)
+                {
+                    Detail const detail = vft[srcGps][srcCand][destCand];
+                    if(f[srcCand] == -oo)   //忽略不可达的候选点
+                        continue;
+
+                    double fst = w[srcGps] *
+                                 n[destGps][destCand] *
+                                 detail.v;
+
+                    double sum;
+                    sum = f[srcCand] + fst;
+
+                    cout<<"srcGps: "<<srcGps<<"srcCand: "<<srcCand<<" destGps: "<<destGps<<" destCand:"<<destCand<<endl;
+                    cout<<"avgSpeed: "<<detail.avg_speed<<" fst: "<<fst<<" maxF:"<<maxF<<" sum:"<<sum<<endl;
+
+                    if (sum > maxF)
+                    {
+                        maxF = sum;
+                        preCandIdx = srcCand;
+                    }
+                }
+                newF[destCand] = maxF;
+                pre[destGps - gpsBegin][destCand] = preCandIdx;
+            }
+        }
 
         if ( destGps == focusOnGps )
         {
-            for(vector<double>::size_type i = 0; i < f.size(); ++i)
+            for(vector<double>::size_type i = 0; i < newF.size(); ++i)
             {
                 if ( i != (unsigned int)mustPassCand )
                 {
-                    f[i] = -oo;
+                    newF[i] = -oo;
                 }
             }
         }
-        if (b::all(f, lambda::arg1 == -oo) )
+        if (b::all(newF, lambda::arg1 == -oo) )
         {
-            return -1;
+                return -1;
         }
+        f = std::move(newF);        //新的f值数组替换掉前一个点的，省空间
 
         cout<<"desGps: "<<destGps<<endl;
         for(auto n: f)
@@ -308,6 +356,7 @@ double IVMM::find_sequence(
         idx = pre[nGps][idx];
     }
 
+    cout<<"fvalue: "<<fvalue<<endl;
     cout<<endl<<endl;
 
     return fvalue;
@@ -371,6 +420,7 @@ bool IVMM::map_match(vector<GpsPoint> const &log,
         }
         if ( badConnection == candidates[i].size() )
         {
+            cout << "wocao" <<endl;
             return false;
         }
     }
@@ -382,9 +432,9 @@ bool IVMM::map_match(vector<GpsPoint> const &log,
         finalCand[i] = max_element(candidates[i].begin(), candidates[i].end(), [](Candidate const & a, Candidate const & b){return make_pair(a.vote, a.fvalue) < make_pair( b.vote, b.fvalue);})  - candidates[i].begin();
     }
 
-    cout<<"finalCand: ";
-    for(auto n: finalCand)
-        cout<<n<<"->";
+//    cout<<"finalCand: ";
+//    for(auto n: finalCand)
+//        cout<<n<<"->";
 
     return true;
 }
