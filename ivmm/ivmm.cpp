@@ -210,6 +210,7 @@ double IVMM::find_sequence(
 {
 
     vector<double> f(candidates[gpsBegin].size());
+    vector<double> initFocusf;    //用于保存focus点未经-oo化的值
     VVector<int> pre;
     initPre(pre, candidates, gpsBegin, gpsEnd);
 
@@ -218,9 +219,9 @@ double IVMM::find_sequence(
     {
         f[i] = w[gpsBegin] * n[gpsBegin][i];
     }
-
     if ( gpsBegin == focusOnGps)        //将除了focus的第mustPass个候选点的值改为-oo
     {
+        initFocusf = f;
         for(vector<int>::size_type i = 0; i < candidates[focusOnGps].size(); ++i)
         {
             if ( i != (unsigned int)mustPassCand )
@@ -253,22 +254,39 @@ double IVMM::find_sequence(
                 cout<<"avg speed: "<<detail.avg_speed<<" weight speedf: "<<detail.weight_speed*param.factor<<endl;
                 if(detail.avg_speed > detail.weight_speed * param.factor)        //忽略真实平均速度速度超过道路加权限速合理范围的点
                     continue;
-                hasTurePath = true;
+
+                //前一点是可达的点才认为是存在可以到达下一点的点
+                if(srcGps == focusOnGps)
+                {
+                    if(initFocusf[srcCand] != -oo)
+                        hasTurePath = true;
+                }
                 if(f[srcCand] == -oo)   //忽略不可达的候选点
                     continue;
+                hasTurePath = true;
 
-                double fst = w[srcGps] *
-                             n[destGps][destCand] *
-                             detail.v * detail.ft;
-                cout<<" fst: "<<fst<<endl;
-                if(detail.avg_speed != 0)   //同一个点的就不要考虑了
+                //获取src和des两候选点所在路段的限速
+                RoadSegment const& srcRs = map_->roadsegment(candidates[srcGps][srcCand].point.index);
+                RoadSegment const& desRs = map_->roadsegment(candidates[destGps][destCand].point.index);
+                double srcRsSpeed = srcRs.properties.get<double>("SPEED");
+                double desRsSpeed = desRs.properties.get<double>("SPEED");
+                double rsSpeedFac = srcRsSpeed / (abs(srcRsSpeed - desRsSpeed) + srcRsSpeed);
+
+                double fst = n[destGps][destCand] *
+                             detail.v * detail.ft * rsSpeedFac;
+                cout<<"n: "<<n[destGps][destCand]<<" v: "<<detail.v<<" ft: "<<detail.ft<<" speedF: "<<rsSpeedFac<<endl;
+
+                if(detail.avg_speed != 0 && !(candidates[destGps].size() == 1 && f.size() == 1))   //同一个点和两点之间只有唯一路径的就不要考虑了
                     if(fst < 1.0e-04)   //忽略边权值太小的候选点
                         continue;
+
+                fst *= w[srcGps];
+                cout<<"fst: "<<fst<<endl;
 
                 double sum;
                 sum = f[srcCand] + fst;
 
-                cout <<" maxF:"<<maxF<<" sum:"<<sum<<endl;
+                cout <<"maxF:"<<maxF<<" sum:"<<sum<<endl;
 
 //                if ( f[srcCand] + fst > maxF )
                 if (sum > maxF)
@@ -321,6 +339,7 @@ double IVMM::find_sequence(
 
         if ( destGps == focusOnGps )
         {
+            initFocusf = newF;
             for(vector<double>::size_type i = 0; i < newF.size(); ++i)
             {
                 if ( i != (unsigned int)mustPassCand )
@@ -338,7 +357,7 @@ double IVMM::find_sequence(
         cout<<"desGps: "<<destGps<<endl;
         for(auto n: f)
             cout<< n<< " ";
-        cout<<endl;
+        cout<<endl<<endl;
 
     }
 
@@ -390,6 +409,17 @@ bool IVMM::map_match(vector<GpsPoint> const &log,
     n = normal(log, candidates);        //计算正态分布值
     details = this->detail(log, paths);
 
+    /* debug：用于查看gps点的候选点位置  */
+    for(size_t i=0; i<log.size(); ++i)
+    {
+        cout << "GPS: "<< i << endl;
+        for(size_t j=0; j<candidates[i].size() ; ++j)
+        {
+            cout << setiosflags(ios::fixed) << setprecision(16) << j << ": " << candidates[i][j].point.geometry.x() << "," << candidates[i][j].point.geometry.y() << endl;
+        }
+        cout<<endl;
+    }
+
     vector<double> w(log.size() - 1, 1.0);      //和其余n-1个点的权值
 
     int sz = (int) log.size();
@@ -420,7 +450,7 @@ bool IVMM::map_match(vector<GpsPoint> const &log,
         }
         if ( badConnection == candidates[i].size() )
         {
-            cout << "wocao" <<endl;
+            cout << "gps " << i << " match fail" << endl;
             return false;
         }
     }
@@ -432,9 +462,10 @@ bool IVMM::map_match(vector<GpsPoint> const &log,
         finalCand[i] = max_element(candidates[i].begin(), candidates[i].end(), [](Candidate const & a, Candidate const & b){return make_pair(a.vote, a.fvalue) < make_pair( b.vote, b.fvalue);})  - candidates[i].begin();
     }
 
-//    cout<<"finalCand: ";
-//    for(auto n: finalCand)
-//        cout<<n<<"->";
+    cout<<"finalCand: ";
+    for(auto n: finalCand)
+        cout<<n<<"->";
+    cout << endl;
 
     return true;
 }
