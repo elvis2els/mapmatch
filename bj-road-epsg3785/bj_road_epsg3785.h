@@ -40,10 +40,10 @@ struct BJRoadEpsg3785IDPicker{
         double speed = 30 / 3.6;    // m/s
         switch(path_class){
             case 4:
-                speed = 70 / 3.6;
+                speed = 80 / 3.6;
                 break;
             case 3:
-                speed = 50 / 3.6;
+                speed = 60 / 3.6;
                 break;
             case 2:
                 speed = 40 / 3.6;
