@@ -412,7 +412,7 @@ bool IVMM::map_match(vector<GpsPoint> const &log,
     /* debug：用于查看gps点的候选点位置  */
     for(size_t i=0; i<log.size(); ++i)
     {
-        cout << "GPS: "<< i << endl;
+        cout << "GPS: "<< i << "   " << log[i].geometry.x() << "," << log[i].geometry.y() << endl;
         for(size_t j=0; j<candidates[i].size() ; ++j)
         {
             cout << setiosflags(ios::fixed) << setprecision(16) << j << ": " << candidates[i][j].point.geometry.x() << "," << candidates[i][j].point.geometry.y() << endl;

@@ -27,6 +27,9 @@ vector<GpsPoint> load_from_file(std::string const & name){
                 ifs >> x && ifs.ignore() &&
                 ifs >> y && ifs.ignore() &&
                 ifs.ignore(1024, '\n')){
+            //去重
+            if(!ret.empty() && ret.back().geometry.x() == x && ret.back().geometry.y() == y)
+                continue;
             GpsPoint p(x, y, ptime);
             ret.push_back(p);
         }
