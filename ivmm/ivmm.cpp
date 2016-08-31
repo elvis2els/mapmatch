@@ -254,6 +254,8 @@ double IVMM::find_sequence(
                 cout<<"avg speed: "<<detail.avg_speed<<" weight speedf: "<<detail.weight_speed*param.factor<<endl;
                 if(detail.avg_speed > detail.weight_speed * param.factor)        //忽略真实平均速度速度超过道路加权限速合理范围的点
                     continue;
+//                if(detail.avg_speed == 0 && !bg::equals(candidates[srcGps][srcCand].point,candidates[destGps][destCand].point))
+//                    continue;
 
                 //前一点是可达的点才认为是存在可以到达下一点的点
                 if(srcGps == focusOnGps)
@@ -277,8 +279,11 @@ double IVMM::find_sequence(
                 cout<<"n: "<<n[destGps][destCand]<<" v: "<<detail.v<<" ft: "<<detail.ft<<" speedF: "<<rsSpeedFac<<endl;
 
                 if(detail.avg_speed != 0 && !(candidates[destGps].size() == 1 && f.size() == 1))   //同一个点和两点之间只有唯一路径的就不要考虑了
-                    if(fst < 1.0e-04)   //忽略边权值太小的候选点
+                    if(fst < 5.0e-05)   //忽略边权值太小的候选点
+                    {
+                        cout << "fst is too small: " << fst <<endl;
                         continue;
+                    }
 
                 fst *= w[srcGps];
                 cout<<"fst: "<<fst<<endl;
@@ -412,10 +417,10 @@ bool IVMM::map_match(vector<GpsPoint> const &log,
     /* debug：用于查看gps点的候选点位置  */
     for(size_t i=0; i<log.size(); ++i)
     {
-        cout << "GPS: "<< i << "   " << log[i].geometry.x() << "," << log[i].geometry.y() << endl;
+        cout <<  "GPS: "<< i << "   " <<  setiosflags(ios::fixed) << setprecision(16) << log[i].geometry.x() << "," << log[i].geometry.y() << endl;
         for(size_t j=0; j<candidates[i].size() ; ++j)
         {
-            cout << setiosflags(ios::fixed) << setprecision(16) << j << ": " << candidates[i][j].point.geometry.x() << "," << candidates[i][j].point.geometry.y() << endl;
+            cout << j << ": " << candidates[i][j].point.geometry.x() << "," << candidates[i][j].point.geometry.y() << endl;
         }
         cout<<endl;
     }
