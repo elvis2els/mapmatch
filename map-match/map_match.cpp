@@ -33,12 +33,12 @@ bool generateDefaultConfigFile(string const& name)
     //IVMMParam param;
     pt::ptree pt;
     pt.put("IVMM.projectDistMean", 5.0);
-    pt.put("IVMM.projectDistStddev", 20.0);
+    pt.put("IVMM.projectDistStddev", 30.0);
     pt.put("IVMM.candidateQueryRadious", 100.0);
-    pt.put("IVMM.candidateLimit", 5);
+    pt.put("IVMM.candidateLimit", 10);
     pt.put("IVMM.beta", 5000.0);
-    pt.put("IVMM.window", 50);
-    pt.put("IVMM.factor", 1.5);
+    pt.put("IVMM.window", 10);
+    pt.put("IVMM.factor", 1.6);
     try
     {
         pt::write_ini(name, pt);
