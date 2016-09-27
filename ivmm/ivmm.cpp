@@ -231,10 +231,12 @@ double IVMM::find_sequence(
         }
     }
 
+#ifdef QT_QML_DEBUG
     cout<<"FocusOnGps: "<<focusOnGps<<endl;
     for(auto n: f)
         cout<< n<< " ";
     cout<<endl;
+#endif
 
     for(int destGps = gpsBegin + 1; destGps < gpsEnd; ++destGps)
     {
@@ -250,8 +252,11 @@ double IVMM::find_sequence(
             {                
                 Detail const detail = vft[srcGps][srcCand][destCand];
 
+#ifdef QT_QML_DEBUG
                 cout<<"srcGps: "<<srcGps<<"srcCand: "<<srcCand<<" destGps: "<<destGps<<" destCand:"<<destCand<<endl;
                 cout<<"avg speed: "<<detail.avg_speed<<" weight speedf: "<<detail.weight_speed*param.factor<<endl;
+#endif
+
                 if(detail.avg_speed > detail.weight_speed * param.factor)        //忽略真实平均速度速度超过道路加权限速合理范围的点
                     continue;
 //                if(detail.avg_speed == 0 && !bg::equals(candidates[srcGps][srcCand].point,candidates[destGps][destCand].point))
@@ -276,27 +281,35 @@ double IVMM::find_sequence(
 
                 double fst = n[destGps][destCand] *
                              detail.v * detail.ft * rsSpeedFac;
+
+#ifdef QT_QML_DEBUG
                 cout<<"n: "<<n[destGps][destCand]<<" v: "<<detail.v<<" ft: "<<detail.ft<<" speedF: "<<rsSpeedFac<<endl;
+#endif
 
                 if(detail.avg_speed != 0 && !(candidates[destGps].size() == 1 && f.size() == 1))   //同一个点和两点之间只有唯一路径的就不要考虑了
                     if(fst < 5.0e-05)   //忽略边权值太小的候选点
                     {
+#ifdef QT_QML_DEBUG
                         cout << "fst is too small: " << fst <<endl;
+#endif
                         continue;
                     }
 
                 fst *= w[srcGps];
+
+#ifdef QT_QML_DEBUG
                 cout<<"fst: "<<fst<<endl;
+#endif
 
                 double sum;
                 sum = f[srcCand] + fst;
 
+#ifdef QT_QML_DEBUG
                 cout <<"maxF:"<<maxF<<" sum:"<<sum<<endl;
+#endif
 
-//                if ( f[srcCand] + fst > maxF )
                 if (sum > maxF)
                 {
-//                    maxF = f[srcCand] + fst;
                     maxF = sum;
                     preCandIdx = srcCand;
                 }
@@ -310,7 +323,9 @@ double IVMM::find_sequence(
             if(hasTurePath)
                 return -1;
             //由于地图原因导致达不可达点，仅做空间分析
+#ifdef QT_QML_DEBUG
             cout<<"!hasTurePath"<<endl;
+#endif
             for(vector<int>::size_type destCand = 0; destCand < candidates[destGps].size(); ++destCand)
             {
                 double maxF = -oo;
@@ -328,8 +343,10 @@ double IVMM::find_sequence(
                     double sum;
                     sum = f[srcCand] + fst;
 
+#ifdef QT_QML_DEBUG
                     cout<<"srcGps: "<<srcGps<<"srcCand: "<<srcCand<<" destGps: "<<destGps<<" destCand:"<<destCand<<endl;
                     cout<<"avgSpeed: "<<detail.avg_speed<<" fst: "<<fst<<" maxF:"<<maxF<<" sum:"<<sum<<endl;
+#endif
 
                     if (sum > maxF)
                     {
@@ -359,14 +376,15 @@ double IVMM::find_sequence(
         }
         f = std::move(newF);        //新的f值数组替换掉前一个点的，省空间
 
+#ifdef QT_QML_DEBUG
         cout<<"desGps: "<<destGps<<endl;
         for(auto n: f)
             cout<< n<< " ";
         cout<<endl<<endl;
+#endif
 
     }
 
-//    int idx = b::max_element<b::return_begin_found>(f).size();
     int idx = max_element(f.begin(), f.end()) - f.begin();
     double fvalue = f[idx];
     int nGps = gpsEnd - gpsBegin;
@@ -374,14 +392,18 @@ double IVMM::find_sequence(
 
     while(nGps--)
     {
+#ifdef QT_QML_DEBUG
         cout<<idx<<"<-";
+#endif
 
         seq[nGps] = idx;//const_cast<Candidate *>(&candidates[nGps][idx]);
         idx = pre[nGps][idx];
     }
 
+#ifdef QT_QML_DEBUG
     cout<<"fvalue: "<<fvalue<<endl;
     cout<<endl<<endl;
+#endif
 
     return fvalue;
 }
@@ -415,6 +437,7 @@ bool IVMM::map_match(vector<GpsPoint> const &log,
     details = this->detail(log, paths);
 
     /* debug：用于查看gps点的候选点位置  */
+#ifdef QT_QML_DEBUG
     for(size_t i=0; i<log.size(); ++i)
     {
         cout <<  "GPS: "<< i << "   " <<  setiosflags(ios::fixed) << setprecision(16) << log[i].geometry.x() << "," << log[i].geometry.y() << endl;
@@ -424,6 +447,7 @@ bool IVMM::map_match(vector<GpsPoint> const &log,
         }
         cout<<endl;
     }
+#endif
 
     vector<double> w(log.size() - 1, 1.0);      //和其余n-1个点的权值
 
@@ -445,7 +469,6 @@ bool IVMM::map_match(vector<GpsPoint> const &log,
             }
             else
             {
-                //for(Candidate* pc : sequence) pc->vote++;
                 for(vector<int>::size_type b = 0; b < sequence.size(); ++b)
                 {
                     ++candidates[b + begin][sequence[b]].vote;
@@ -455,7 +478,9 @@ bool IVMM::map_match(vector<GpsPoint> const &log,
         }
         if ( badConnection == candidates[i].size() )
         {
+#ifdef QT_QML_DEBUG
             cout << "gps " << i << " match fail" << endl;
+#endif
             return false;
         }
     }
@@ -467,10 +492,12 @@ bool IVMM::map_match(vector<GpsPoint> const &log,
         finalCand[i] = max_element(candidates[i].begin(), candidates[i].end(), [](Candidate const & a, Candidate const & b){return make_pair(a.vote, a.fvalue) < make_pair( b.vote, b.fvalue);})  - candidates[i].begin();
     }
 
+#ifdef QT_QML_DEBUG
     cout<<"finalCand: ";
     for(auto n: finalCand)
         cout<<n<<"->";
     cout << endl;
+#endif
 
     return true;
 }
