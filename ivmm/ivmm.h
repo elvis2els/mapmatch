@@ -64,6 +64,8 @@ public:
     VVVector<Detail>
         detail(std::vector<GpsPoint> const& log, VVVector<Path> const& paths)const;
 
+    std::vector<int> find_final(VVVector<int> const& votes, VVector<Candidate> const& finalCand)const;
+
     double find_sequence(
             std::vector<int>& seq,
             VVector<double> const& n,

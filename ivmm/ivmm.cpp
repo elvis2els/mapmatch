@@ -72,7 +72,7 @@ double weight_speed(Path const& path, RoadMap const& map)
 
     double d = path.total_length();
     double weightSpeed = 0;
-    for(auto & e : path.entities)
+    for (auto & e : path.entities)
     {
         weightSpeed += b::apply_visitor(LengthGetter(), e) / d * b::apply_visitor(SpeedGetter(map), e);
     }
@@ -85,7 +85,7 @@ static void initPre(
 {
     int nCand = end - begin;
     pre.resize(nCand);
-    for(int i = begin; i != end; ++i)
+    for (int i = begin; i != end; ++i)
     {
         pre[i - begin].resize(candidates[i].size(), -1);
     }
@@ -95,7 +95,7 @@ IVMM::VVector<Candidate> IVMM::candidates(std::vector<GpsPoint> const &log) cons
 {
     VVector<Candidate> candidates;
     candidates.resize(log.size());
-    for(size_t i = 0; i < log.size(); ++i)
+    for (size_t i = 0; i < log.size(); ++i)
     {
         double r = param.candidate_query_radious;
         vector<int> roadIdx = map_->query_road(log[i].geometry, r);     //查询候选路段id号
@@ -105,7 +105,7 @@ IVMM::VVector<Candidate> IVMM::candidates(std::vector<GpsPoint> const &log) cons
             roadIdx = map_->query_road(log[i].geometry, r);
         }
 
-        for(int ri : roadIdx)
+        for (int ri : roadIdx)
         {
             RoadSegment const& rs = map_->roadsegment(ri);
             Candidate c;
@@ -127,7 +127,7 @@ template<typename V, typename C>
 static void initVV(IVMM::VVector<V>& vv, IVMM::VVector<C> const& c)
 {
     vv.resize(c.size());
-    for(size_t i = 0; i < c.size(); ++i)
+    for (size_t i = 0; i < c.size(); ++i)
     {
         vv[i].resize(c[i].size());
     }
@@ -137,12 +137,12 @@ template<typename V, typename P>
 static void initVVV(IVMM::VVVector<V>& vvv, IVMM::VVector<P> const& c)
 {
     vvv.resize(c.size() - 1);       //代表的是每一个点到下一点的路径，所以最后一个点不需要
-    for(size_t i = 1; i < c.size(); ++i)
+    for (size_t i = 1; i < c.size(); ++i)
     {
         vector<P> const& srcCand = c[i - 1];
         vector<P> const& destCand = c[i];
         vvv[i - 1].resize(srcCand.size());
-        for(auto & e : vvv[i - 1])
+        for (auto & e : vvv[i - 1])
         {
             e.resize(destCand.size());
         }
@@ -153,10 +153,10 @@ template<typename V, typename P>
 static void initVVV(IVMM::VVVector<V> & vvv, IVMM::VVVector<P> const& p)
 {
     vvv.resize(p.size());
-    for(size_t i = 0; i < p.size(); ++i)
+    for (size_t i = 0; i < p.size(); ++i)
     {
         vvv[i].resize(p[i].size());
-        for(size_t j = 0; j < p[i].size(); ++j)
+        for (size_t j = 0; j < p[i].size(); ++j)
         {
             vvv[i][j].resize(p[i][j].size());
         }
@@ -167,9 +167,9 @@ IVMM::VVector<double> IVMM::normal(std::vector<GpsPoint> const &log, IVMM::VVect
 {
     VVector<double> n;
     initVV(n, candidates);
-    for(size_t i = 0; i < candidates.size(); ++i)
+    for (size_t i = 0; i < candidates.size(); ++i)
     {
-        for(size_t j = 0; j < candidates[i].size(); ++j)
+        for (size_t j = 0; j < candidates[i].size(); ++j)
         {
             n[i][j] = ::normal(log[i], candidates[i][j], param.project_dist_mean, param.project_dist_stddev);
         }
@@ -182,13 +182,13 @@ IVMM::VVVector<Path> IVMM::paths(IVMM::VVector<Candidate> const &candidates) con
 {
     VVVector<Path> paths;
     initVVV(paths, candidates);
-    for(size_t i = 1; i < candidates.size(); ++i)
+    for (size_t i = 1; i < candidates.size(); ++i)
     {
         int srcGps = i - 1;
         int destGps = i;
-        for(size_t srcCand = 0; srcCand < candidates[srcGps].size(); ++srcCand)         //求每个候选点之间的最短路径
+        for (size_t srcCand = 0; srcCand < candidates[srcGps].size(); ++srcCand)        //求每个候选点之间的最短路径
         {
-            for(size_t destCand = 0; destCand < candidates[destGps].size(); ++destCand)
+            for (size_t destCand = 0; destCand < candidates[destGps].size(); ++destCand)
             {
                 paths[srcGps][srcCand][destCand] =
                     map_->shortest_path(candidates[srcGps][srcCand].point,
@@ -215,14 +215,14 @@ double IVMM::find_sequence(
     initPre(pre, candidates, gpsBegin, gpsEnd);
 
     //init
-    for(vector<int>::size_type i = 0; i < candidates[gpsBegin].size(); ++i)
+    for (vector<int>::size_type i = 0; i < candidates[gpsBegin].size(); ++i)
     {
         f[i] = w[gpsBegin] * n[gpsBegin][i];
     }
     if ( gpsBegin == focusOnGps)        //将除了focus的第mustPass个候选点的值改为-oo
     {
         initFocusf = f;
-        for(vector<int>::size_type i = 0; i < candidates[focusOnGps].size(); ++i)
+        for (vector<int>::size_type i = 0; i < candidates[focusOnGps].size(); ++i)
         {
             if ( i != (unsigned int)mustPassCand )
             {
@@ -232,43 +232,43 @@ double IVMM::find_sequence(
     }
 
 #ifdef QT_QML_DEBUG
-    cout<<"FocusOnGps: "<<focusOnGps<<endl;
-    for(auto n: f)
-        cout<< n<< " ";
-    cout<<endl;
+    cout << "FocusOnGps: " << focusOnGps << endl;
+    for (auto n : f)
+        cout << n << " ";
+    cout << endl;
 #endif
 
-    for(int destGps = gpsBegin + 1; destGps < gpsEnd; ++destGps)
+    for (int destGps = gpsBegin + 1; destGps < gpsEnd; ++destGps)
     {
         vector<double> newF(candidates[destGps].size());
         int srcGps = destGps - 1;
         bool hasTurePath = false;       //标记是否有候选点可以在合理速度下到达下一gps候选点
-        for(vector<int>::size_type destCand = 0; destCand < candidates[destGps].size(); ++destCand)
+        for (vector<int>::size_type destCand = 0; destCand < candidates[destGps].size(); ++destCand)
         {
             //find max pre candidate for destCand
             double maxF = -oo;
-            int preCandIdx = -1;          
-            for(vector<double>::size_type srcCand = 0; srcCand < f.size(); ++srcCand)
-            {                
+            int preCandIdx = -1;
+            for (vector<double>::size_type srcCand = 0; srcCand < f.size(); ++srcCand)
+            {
                 Detail const detail = vft[srcGps][srcCand][destCand];
 
 #ifdef QT_QML_DEBUG
-                cout<<"srcGps: "<<srcGps<<"srcCand: "<<srcCand<<" destGps: "<<destGps<<" destCand:"<<destCand<<endl;
-                cout<<"avg speed: "<<detail.avg_speed<<" weight speedf: "<<detail.weight_speed*param.factor<<endl;
+                cout << "srcGps: " << srcGps << "srcCand: " << srcCand << " destGps: " << destGps << " destCand:" << destCand << endl;
+                cout << "avg speed: " << detail.avg_speed << " weight speedf: " << detail.weight_speed*param.factor << endl;
 #endif
 
-                if(detail.avg_speed > detail.weight_speed * param.factor)        //忽略真实平均速度速度超过道路加权限速合理范围的点
+                if (detail.avg_speed > detail.weight_speed * param.factor)       //忽略真实平均速度速度超过道路加权限速合理范围的点
                     continue;
 //                if(detail.avg_speed == 0 && !bg::equals(candidates[srcGps][srcCand].point,candidates[destGps][destCand].point))
 //                    continue;
 
                 //前一点是可达的点才认为是存在可以到达下一点的点
-                if(srcGps == focusOnGps)
+                if (srcGps == focusOnGps)
                 {
-                    if(initFocusf[srcCand] != -oo)
+                    if (initFocusf[srcCand] != -oo)
                         hasTurePath = true;
                 }
-                if(f[srcCand] == -oo)   //忽略不可达的候选点
+                if (f[srcCand] == -oo)  //忽略不可达的候选点
                     continue;
                 hasTurePath = true;
 
@@ -283,14 +283,14 @@ double IVMM::find_sequence(
                              detail.v * detail.ft * rsSpeedFac;
 
 #ifdef QT_QML_DEBUG
-                cout<<"n: "<<n[destGps][destCand]<<" v: "<<detail.v<<" ft: "<<detail.ft<<" speedF: "<<rsSpeedFac<<endl;
+                cout << "n: " << n[destGps][destCand] << " v: " << detail.v << " ft: " << detail.ft << " speedF: " << rsSpeedFac << endl;
 #endif
 
-                if(detail.avg_speed != 0 && !(candidates[destGps].size() == 1 && f.size() == 1))   //同一个点和两点之间只有唯一路径的就不要考虑了
-                    if(fst < 5.0e-05)   //忽略边权值太小的候选点
+                if (detail.avg_speed != 0 && !(candidates[destGps].size() == 1 && f.size() == 1))  //同一个点和两点之间只有唯一路径的就不要考虑了
+                    if (fst < 5.0e-05)  //忽略边权值太小的候选点
                     {
 #ifdef QT_QML_DEBUG
-                        cout << "fst is too small: " << fst <<endl;
+                        cout << "fst is too small: " << fst << endl;
 #endif
                         continue;
                     }
@@ -298,14 +298,14 @@ double IVMM::find_sequence(
                 fst *= w[srcGps];
 
 #ifdef QT_QML_DEBUG
-                cout<<"fst: "<<fst<<endl;
+                cout << "fst: " << fst << endl;
 #endif
 
                 double sum;
                 sum = f[srcCand] + fst;
 
 #ifdef QT_QML_DEBUG
-                cout <<"maxF:"<<maxF<<" sum:"<<sum<<endl;
+                cout << "maxF:" << maxF << " sum:" << sum << endl;
 #endif
 
                 if (sum > maxF)
@@ -320,20 +320,20 @@ double IVMM::find_sequence(
 
         if (b::all(newF, lambda::arg1 == -oo) )
         {
-            if(hasTurePath)
+            if (hasTurePath)
                 return -1;
             //由于地图原因导致达不可达点，仅做空间分析
 #ifdef QT_QML_DEBUG
-            cout<<"!hasTurePath"<<endl;
+            cout << "!hasTurePath" << endl;
 #endif
-            for(vector<int>::size_type destCand = 0; destCand < candidates[destGps].size(); ++destCand)
+            for (vector<int>::size_type destCand = 0; destCand < candidates[destGps].size(); ++destCand)
             {
                 double maxF = -oo;
                 int preCandIdx = -1;
-                for(vector<double>::size_type srcCand = 0; srcCand < f.size(); ++srcCand)
+                for (vector<double>::size_type srcCand = 0; srcCand < f.size(); ++srcCand)
                 {
                     Detail const detail = vft[srcGps][srcCand][destCand];
-                    if(f[srcCand] == -oo)   //忽略不可达的候选点
+                    if (f[srcCand] == -oo)  //忽略不可达的候选点
                         continue;
 
                     double fst = w[srcGps] *
@@ -344,8 +344,8 @@ double IVMM::find_sequence(
                     sum = f[srcCand] + fst;
 
 #ifdef QT_QML_DEBUG
-                    cout<<"srcGps: "<<srcGps<<"srcCand: "<<srcCand<<" destGps: "<<destGps<<" destCand:"<<destCand<<endl;
-                    cout<<"avgSpeed: "<<detail.avg_speed<<" fst: "<<fst<<" maxF:"<<maxF<<" sum:"<<sum<<endl;
+                    cout << "srcGps: " << srcGps << "srcCand: " << srcCand << " destGps: " << destGps << " destCand:" << destCand << endl;
+                    cout << "avgSpeed: " << detail.avg_speed << " fst: " << fst << " maxF:" << maxF << " sum:" << sum << endl;
 #endif
 
                     if (sum > maxF)
@@ -362,7 +362,7 @@ double IVMM::find_sequence(
         if ( destGps == focusOnGps )
         {
             initFocusf = newF;
-            for(vector<double>::size_type i = 0; i < newF.size(); ++i)
+            for (vector<double>::size_type i = 0; i < newF.size(); ++i)
             {
                 if ( i != (unsigned int)mustPassCand )
                 {
@@ -372,15 +372,15 @@ double IVMM::find_sequence(
         }
         if (b::all(newF, lambda::arg1 == -oo) )
         {
-                return -1;
+            return -1;
         }
         f = std::move(newF);        //新的f值数组替换掉前一个点的，省空间
 
 #ifdef QT_QML_DEBUG
-        cout<<"desGps: "<<destGps<<endl;
-        for(auto n: f)
-            cout<< n<< " ";
-        cout<<endl<<endl;
+        cout << "desGps: " << destGps << endl;
+        for (auto n : f)
+            cout << n << " ";
+        cout << endl << endl;
 #endif
 
     }
@@ -390,10 +390,10 @@ double IVMM::find_sequence(
     int nGps = gpsEnd - gpsBegin;
     seq.resize(nGps);
 
-    while(nGps--)
+    while (nGps--)
     {
 #ifdef QT_QML_DEBUG
-        cout<<idx<<"<-";
+        cout << idx << "<-";
 #endif
 
         seq[nGps] = idx;//const_cast<Candidate *>(&candidates[nGps][idx]);
@@ -401,8 +401,8 @@ double IVMM::find_sequence(
     }
 
 #ifdef QT_QML_DEBUG
-    cout<<"fvalue: "<<fvalue<<endl;
-    cout<<endl<<endl;
+    cout << "fvalue: " << fvalue << endl;
+    cout << endl << endl;
 #endif
 
     return fvalue;
@@ -424,9 +424,71 @@ static pair<int, int> window(int i, int w, int sz)
     return { begin, end };
 }
 
-bool IVMM::map_match(vector<GpsPoint> const &log,
-                     VVector<double> & n,
-                     VVVector<Detail> &details,
+void initVotes(IVMM::VVVector<int>& votes, IVMM::VVector<Candidate> const& candidates) {
+    initVVV(votes, candidates);
+    for (size_t i = 1; i < candidates.size(); ++i)
+    {
+        int srcGps = i - 1;
+        // int destGps = i;
+        for (size_t srcCand = 0; srcCand < candidates[srcGps].size(); ++srcCand)        //求每个候选点之间的最短路径
+        {
+            // for (size_t destCand = 0; destCand < candidates[destGps].size(); ++destCand)
+            // {
+            //     votes[srcGps][srcCand][destCand] = 0;
+            // }
+            votes[srcGps][srcCand].assign(votes[srcGps][srcCand].size(), 0);
+        }
+    }
+}
+
+std::vector<int> IVMM::find_final(VVVector<int> const& votes, VVector<Candidate> const& candidates) const
+{
+    std::vector<int> finalCand;
+    finalCand.resize(candidates.size());
+    for (size_t srcGps = 0; srcGps < votes.size(); ++srcGps)
+    {
+        if (srcGps == 0)
+        {
+            int maxfst = 0, maxvote = 0, maxSrcCand, maxDesCand;
+            for (size_t srcCand = 0; srcCand < votes[0].size(); ++srcCand)
+            {
+                for (size_t destCand = 0; destCand < votes[0][srcCand].size(); ++destCand)
+                {
+                    if (votes[0][srcCand][destCand] > maxvote || (votes[0][srcCand][destCand] == maxvote && candidates[1][destCand].fvalue > maxfst))
+                    {
+                        maxvote = votes[0][srcCand][destCand];
+                        maxSrcCand = srcCand;
+                        maxDesCand = destCand;
+                        maxfst = candidates[1][destCand].fvalue;
+                    }
+                }
+            }
+            finalCand[0] = maxSrcCand;
+            finalCand[1] = maxDesCand;
+        }
+        else
+        {
+            int srcCand = finalCand[srcGps], desGps = srcGps + 1;
+            int maxfst = 0, maxvote = 0, maxDesCand;
+            for (size_t destCand = 0; destCand < votes[srcGps][srcCand].size(); ++destCand)
+            {
+                if (votes[srcGps][srcCand][destCand] > maxvote || (votes[srcGps][srcCand][destCand] == maxvote && candidates[desGps][destCand].fvalue > maxfst))
+                {
+                    maxvote = votes[srcGps][srcCand][destCand];
+                    maxDesCand = destCand;
+                    maxfst = candidates[desGps][destCand].fvalue;
+                }
+            }
+            finalCand[desGps] = maxDesCand;
+        }
+    }
+    return finalCand;
+}
+
+
+bool IVMM::map_match(vector<GpsPoint> const& log,
+                     VVector<double>& n,
+                     VVVector<Detail>& details,
                      VVVector<Path>& paths,
                      VVector<Candidate>& candidates,
                      std::vector<int>& finalCand)const
@@ -436,30 +498,34 @@ bool IVMM::map_match(vector<GpsPoint> const &log,
     n = normal(log, candidates);        //计算正态分布值
     details = this->detail(log, paths);
 
+    /* init votes */
+    VVVector<int> votes;
+    initVotes(votes, candidates);
+
     /* debug：用于查看gps点的候选点位置  */
 #ifdef QT_QML_DEBUG
-    for(size_t i=0; i<log.size(); ++i)
+    for (size_t i = 0; i < log.size(); ++i)
     {
-        cout <<  "GPS: "<< i << "   " <<  setiosflags(ios::fixed) << setprecision(16) << log[i].geometry.x() << "," << log[i].geometry.y() << endl;
-        for(size_t j=0; j<candidates[i].size() ; ++j)
+        cout <<  "GPS: " << i << "   " <<  setiosflags(ios::fixed) << setprecision(16) << log[i].geometry.x() << "," << log[i].geometry.y() << endl;
+        for (size_t j = 0; j < candidates[i].size() ; ++j)
         {
             cout << j << ": " << candidates[i][j].point.geometry.x() << "," << candidates[i][j].point.geometry.y() << endl;
         }
-        cout<<endl;
+        cout << endl;
     }
 #endif
 
     vector<double> w(log.size() - 1, 1.0);      //和其余n-1个点的权值
 
     int sz = (int) log.size();
-    for(vector<GpsPoint>::size_type i = 0; i < log.size(); ++i)
+    for (vector<GpsPoint>::size_type i = 0; i < log.size(); ++i)
     {
         int begin, end;
         tie(begin, end) = window(i, param.window, sz);
         //here weight for gps i
         initW(w, log, begin, end, i);
         vector<Candidate>::size_type badConnection = 0;
-        for(vector<Candidate>::size_type k = 0; k < candidates[i].size(); ++k)
+        for (vector<Candidate>::size_type k = 0; k < candidates[i].size(); ++k)
         {
             vector<int> sequence;
             double fvalue = find_sequence(sequence, n, details, log, w , candidates, i, k, begin, end);     //得到文中fvalue和经过候选点k的最佳路径
@@ -469,9 +535,14 @@ bool IVMM::map_match(vector<GpsPoint> const &log,
             }
             else
             {
-                for(vector<int>::size_type b = 0; b < sequence.size(); ++b)
+                /*for (vector<int>::size_type b = 0; b < sequence.size(); ++b)
                 {
                     ++candidates[b + begin][sequence[b]].vote;
+                }*/
+                for (std::vector<int>::size_type b = 1; b < sequence.size(); ++b)
+                {
+                    int srcCand = sequence[b - 1], destCand = sequence[b];
+                    ++votes[b - 1 + begin][srcCand][destCand];
                 }
             }
             candidates[i][k].fvalue = fvalue;
@@ -485,17 +556,17 @@ bool IVMM::map_match(vector<GpsPoint> const &log,
         }
     }
 
-    finalCand.resize(candidates.size());
-    for(VVector<Candidate>::size_type i = 0; i < candidates.size(); ++i)
+    finalCand = find_final(votes, candidates);
+    /*for (VVector<Candidate>::size_type i = 0; i < candidates.size(); ++i)
     {
-//        finalCand[i] = b::max_element<b::return_begin_found>(candidates[i], [](Candidate const & a, Candidate const & b){return make_pair(a.vote, a.fvalue) < make_pair( b.vote, b.fvalue);}).size();
-        finalCand[i] = max_element(candidates[i].begin(), candidates[i].end(), [](Candidate const & a, Candidate const & b){return make_pair(a.vote, a.fvalue) < make_pair( b.vote, b.fvalue);})  - candidates[i].begin();
-    }
+    //        finalCand[i] = b::max_element<b::return_begin_found>(candidates[i], [](Candidate const & a, Candidate const & b){return make_pair(a.vote, a.fvalue) < make_pair( b.vote, b.fvalue);}).size();
+        finalCand[i] = max_element(candidates[i].begin(), candidates[i].end(), [](Candidate const & a, Candidate const & b) {return make_pair(a.vote, a.fvalue) < make_pair( b.vote, b.fvalue);})  - candidates[i].begin();
+    }*/
 
 #ifdef QT_QML_DEBUG
-    cout<<"finalCand: ";
-    for(auto n: finalCand)
-        cout<<n<<"->";
+    cout << "finalCand: ";
+    for (auto n : finalCand)
+        cout << n << "->";
     cout << endl;
 #endif
 
@@ -506,14 +577,14 @@ IVMM::VVVector<Detail> IVMM::detail(std::vector<GpsPoint> const &log, IVMM::VVVe
 {
     VVVector<Detail> details;
     initVVV(details, paths);
-    for(VVVector<Path>::size_type srcGps = 0; srcGps < paths.size(); ++srcGps)
+    for (VVVector<Path>::size_type srcGps = 0; srcGps < paths.size(); ++srcGps)
     {
         int destGps = srcGps + 1;
         double distanceOfTowGps = bg::distance(log[srcGps], log[destGps]);
         int timeInterval = (log[destGps].time - log[srcGps].time).total_seconds();
-        for(VVector<Path>::size_type srcCand = 0; srcCand < paths[srcGps].size(); ++srcCand)
+        for (VVector<Path>::size_type srcCand = 0; srcCand < paths[srcGps].size(); ++srcCand)
         {
-            for(vector<Path>::size_type destCand = 0; destCand < paths[srcGps][srcCand].size(); ++destCand)
+            for (vector<Path>::size_type destCand = 0; destCand < paths[srcGps][srcCand].size(); ++destCand)
             {
                 Detail & detail = details[srcGps][srcCand][destCand];
                 Path const& path = paths[srcGps][srcCand][destCand];
@@ -548,7 +619,7 @@ IVMM::VVVector<Detail> IVMM::detail(std::vector<GpsPoint> const &log, IVMM::VVVe
 
 void IVMM::initW(std::vector<double> &w, std::vector<GpsPoint> const &log, int begin, int end, int focusOnGps) const
 {
-    for(int m = begin; m < end - 1; ++m)
+    for (int m = begin; m < end - 1; ++m)
     {
         int otr = m;
         if ( focusOnGps <= m ) otr++;
@@ -590,7 +661,7 @@ vector<Path> IVMM::map_match(std::vector<GpsPoint> const& log)const
     {
         return finalPath;
     }
-    for(VVVector<Path>::size_type i = 0; i < paths.size(); ++i)
+    for (VVVector<Path>::size_type i = 0; i < paths.size(); ++i)
     {
         int srcBest = finalCand[i];
         int destBest = finalCand[i + 1];
@@ -625,11 +696,11 @@ void IVMM::draw_paths_to_shp(
     DBFAddField(dbf, "N", FTDouble, 12, 6);
 
     int ID = 0;
-    for(int  g = 0 ; g < paths.size(); ++g)
+    for (int  g = 0 ; g < paths.size(); ++g)
     {
-        for( int  c1 = 0; c1 < paths[g].size(); ++c1)
+        for ( int  c1 = 0; c1 < paths[g].size(); ++c1)
         {
-            for(int c2 = 0; c2 < paths[g][c1].size(); ++c2)
+            for (int c2 = 0; c2 < paths[g][c1].size(); ++c2)
             {
                 if ( c1 != finalCand[g] || c2 != finalCand[g + 1])
                     continue;
@@ -680,7 +751,7 @@ vector<Path> IVMM::map_match_s(vector<GpsPoint> const& log, vector<pair<int, int
     //找到path中有效的部分放到ranges中
     auto pathBegin = find_if(paths.begin(), paths.end(), [](Path const & p) { return p.valid(); });
     auto gpsBegin = log.begin() + distance(paths.begin(), pathBegin);
-    while( pathBegin < paths.end() )
+    while ( pathBegin < paths.end() )
     {
         auto firstInvalidPath = find_if(pathBegin, paths.end(), [](Path const & p) { return !p.valid(); });
         auto invalidPathBeginGps = gpsBegin + distance(pathBegin, firstInvalidPath);
@@ -705,7 +776,7 @@ boost::optional<IVMMParam> IVMMParam::load_config(std::string const& filename)
         param.beta = pt.get<double>("IVMM.beta");
         param.window = pt.get<int>("IVMM.window");
     }
-    catch(std::exception const& e)
+    catch (std::exception const& e)
     {
         std::cerr << e.what() << endl;
         return boost::none;
