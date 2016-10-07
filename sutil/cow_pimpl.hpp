@@ -3,57 +3,57 @@
 
 #include  <atomic>
 #include  <utility>
-struct entity_init_tag{};
+struct entity_init_tag {};
 entity_init_tag construct_entity;
 
 template<typename Implementation>
-class COWPImpl final{
+class COWPImpl final {
 public:
     typedef Implementation value_type;
 private:
-    struct Impl{
-        Impl():ref(1){}
+    struct Impl {
+        Impl(): ref(1) {}
 
-        Impl(Impl const& other):ref(1),entity(other.entity){}
+        Impl(Impl const& other): ref(1), entity(other.entity) {}
 
         template<typename... Args>
-        explicit Impl(entity_init_tag, Args&&... args):ref(1),entity(std::forward<Args>(args)...){}
+        explicit Impl(entity_init_tag, Args&&... args): ref(1), entity(std::forward<Args>(args)...) {}
 
 
         std::atomic_int ref;
         Implementation entity;
     }* pimpl;
-    void detach(){
+    void detach() {
         Impl * tmp = new Impl(*pimpl);
         -- pimpl->ref;
-        if (pimpl->ref.load() == 0){
+        if (pimpl->ref.load() == 0) {
             delete pimpl;
         }
         pimpl = tmp;
     }
- 
+
 public:
-    COWPImpl():pimpl(new Impl){}
+    COWPImpl(): pimpl(new Impl) {}
 
     template<typename... Args>
-    explicit COWPImpl(entity_init_tag, Args&&... args):pimpl(new Impl(construct_entity, std::forward<Args>(args)...) ){}
+    explicit COWPImpl(entity_init_tag, Args&&... args): pimpl(new Impl(construct_entity, std::forward<Args>(args)...) ) {}
 
-    explicit COWPImpl(std::nullptr_t):pimpl(nullptr){}
+    explicit COWPImpl(std::nullptr_t): pimpl(nullptr) {}
 
-    COWPImpl(COWPImpl const& other){
-        if (other.pimpl ){
+    COWPImpl(COWPImpl const& other) {
+        if (other.pimpl ) {
             other.pimpl->ref.fetch_add(1);
             pimpl = other.pimpl;
         }
     }
-    
-    COWPImpl(COWPImpl&& other){
+
+    COWPImpl(COWPImpl&& other) {
         pimpl = other.pimpl;
         other.pimpl = nullptr;
     }
 
-    COWPImpl& operator=(COWPImpl const& other){
-        if ( & other != this){
+    COWPImpl& operator=(COWPImpl const& other) {
+        if ( & other != this) {
             if ( other.pimpl )  {
                 other.pimpl->ref.fetch_add(1);
                 this->~COWPImpl();
@@ -66,7 +66,7 @@ public:
         return *this;
     }
 
-    COWPImpl& operator=(COWPImpl&& other){
+    COWPImpl& operator=(COWPImpl&& other) {
         if ( this != & other ) {
             this->~COWPImpl();
             pimpl = other.pimpl;
@@ -75,50 +75,50 @@ public:
         return *this;
     }
 
-    COWPImpl& operator=(std::nullptr_t){
+    COWPImpl& operator=(std::nullptr_t) {
         this->~COWPImpl();
         pimpl = nullptr;
         return *this;
     }
-   
-    bool null()const{
+
+    bool null()const {
         return pimpl == nullptr;
     }
 
-    operator void* ()const{
+    operator void* ()const {
         return pimpl;
     }
-    
-    bool operator ! () const{
+
+    bool operator ! () const {
         return ! null();
     }
 
-    Implementation const* readonly()const{
+    Implementation const* readonly()const {
         if ( not pimpl) return nullptr;
         return  & pimpl->entity;
     }
 
-    Implementation* modifyable(){
-        if (pimpl and pimpl->ref.load() > 1){
+    Implementation* modifyable() {
+        if (pimpl and pimpl->ref.load() > 1) {
             detach();
         }
         return & pimpl->entity;
     }
 
-    Implementation* operator->(){
+    Implementation* operator->() {
         return modifyable();
     }
 
-    Implementation const* operator->()const{
+    Implementation const* operator->()const {
         return readonly();
     }
-    int reference_count()const{
+    int reference_count()const {
         return pimpl->ref.load();
     }
 
-    ~COWPImpl(){
-        if ( pimpl ){
-            if (  -- pimpl->ref == 0 ){
+    ~COWPImpl() {
+        if ( pimpl ) {
+            if (  -- pimpl->ref == 0 ) {
                 delete pimpl;
             }
         }

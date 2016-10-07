@@ -13,7 +13,7 @@
 ///根据地图属性包装一个property map
 ///可以用于BGL
 template<typename PropertyValue>
-class PropertyMapFromRoadProperty{
+class PropertyMapFromRoadProperty {
 public:
     typedef Map::GraphTraits::edge_descriptor key_type;
     typedef typename CharSequenceToStringElseNoChange<PropertyValue>::type value_type;
@@ -22,9 +22,9 @@ public:
     ///
     ///\param map 被包装的map
     ///\param name 地图属性的字段
-    PropertyMapFromRoadProperty(Map const& map, std::string const& name):_map(map),_name(name){}
+    PropertyMapFromRoadProperty(Map const& map, std::string const& name): _map(map), _name(name) {}
 
-    value_type get(key_type const& key)const{
+    value_type get(key_type const& key)const {
         RoadSegment const& seg = _map.roadsegment(key);
         return seg.properties.get<value_type>(_name);
     }
@@ -35,20 +35,20 @@ private:
 
 template<typename T>
 typename PropertyMapFromRoadProperty<T>::value_type
-get(PropertyMapFromRoadProperty<T> const& map, typename PropertyMapFromRoadProperty<T>::key_type const& key){
+get(PropertyMapFromRoadProperty<T> const& map, typename PropertyMapFromRoadProperty<T>::key_type const& key) {
     return map.get(key);
 }
 
 template<typename PropertyValue>
-class PropertyMapGen{
+class PropertyMapGen {
 public:
     typedef Map::GraphTraits::edge_descriptor key_type;
     typedef typename CharSequenceToStringElseNoChange<PropertyValue>::type value_type;
     typedef boost::readable_property_map_tag category;
     template<typename Fun>
-    PropertyMapGen(Map const& map, Fun fun):_map(map), _fun(fun){}
+    PropertyMapGen(Map const& map, Fun fun): _map(map), _fun(fun) {}
 
-    value_type get(key_type const& key)const{
+    value_type get(key_type const& key)const {
         RoadSegment const& seg = _map.roadsegment(key);
         return _fun(key, seg);
     }
@@ -60,20 +60,20 @@ private:
 
 template<typename T>
 typename PropertyMapGen<T>::value_type
-get(PropertyMapGen<T> const& map, typename PropertyMapGen<T>::key_type const& k){
+get(PropertyMapGen<T> const& map, typename PropertyMapGen<T>::key_type const& k) {
     return map.get(k);
 }
 
-namespace boost{
+namespace boost {
 template<typename T>
-struct property_traits<PropertyMapFromRoadProperty<T> >{
+struct property_traits<PropertyMapFromRoadProperty<T> > {
     typedef typename PropertyMapFromRoadProperty<T>::key_type key_type;
     typedef typename PropertyMapFromRoadProperty<T>::value_type value_type;
     typedef typename PropertyMapFromRoadProperty<T>::category category;
 };
 
 template<typename T>
-struct property_traits<PropertyMapGen<T> >{
+struct property_traits<PropertyMapGen<T> > {
     typedef typename PropertyMapGen<T>::key_type key_type;
     typedef typename PropertyMapGen<T>::value_type value_type;
     typedef typename PropertyMapGen<T>::category category;

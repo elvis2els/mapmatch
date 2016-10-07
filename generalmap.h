@@ -184,8 +184,8 @@ class Map
 {
 public:
 
-Map()noexcept:
-    roadsegment_rtree(bgi::dynamic_quadratic(1)), cross_rtree(bgi::dynamic_quadratic(1)) {}
+    Map()noexcept:
+        roadsegment_rtree(bgi::dynamic_quadratic(1)), cross_rtree(bgi::dynamic_quadratic(1)) {}
 
     /// \brief 构建graph
     void build_graph();
@@ -440,13 +440,13 @@ bool Map::load(std::string const& shp,  Picker picker, Checker checker)
 
     int n_road = DBFGetRecordCount(helper.hDbf);    //获取路段数量
     roadsegment_.reserve(n_road);   //roadsegment_是一个路段vector
-    for(int i = 0; i < n_road; ++i)
+    for (int i = 0; i < n_road; ++i)
     {
         SHPObject* linestring = SHPReadObject(helper.hShp, i);  //获取第i条路段
         RoadSegment r;
         int n = linestring->nVertices;  //路网节点数
         r.geometry.reserve(n);  //geometry是多个点组成的vector的linestring
-        for(int i = 0; i < n; ++i)
+        for (int i = 0; i < n; ++i)
         {
             r.geometry.push_back({linestring->padfX[i], linestring->padfY[i]});
         }
@@ -499,7 +499,7 @@ void Map::map_cross_property(std::string const& property_name)
 {
     typedef typename PropertyIndexMap<PropertyValueType>::type MapType;
     MapType pimap;
-    for(auto & c : cross_)
+    for (auto & c : cross_)
     {
         pimap[c.properties.get<PropertyValueType>(property_name)] = c.index;
     }
@@ -510,7 +510,7 @@ template<typename PropertyValueType>
 void Map::map_roadsegment_property(std::string const& property_name)
 {
     typename PropertyIndexMap<PropertyValueType>::type pimap;
-    for(auto & r : roadsegment_)
+    for (auto & r : roadsegment_)
     {
         pimap[r.properties.get<PropertyValueType>(property_name)] = r.index;
     }

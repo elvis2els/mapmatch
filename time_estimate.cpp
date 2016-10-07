@@ -35,7 +35,7 @@ vector<TimedCrossIndex> estimate_time(
 {
 
     vector<TimedCrossIndex> timed_path;
-    for(int i = log_range.first; i + 1 < log_range.second; ++i)
+    for (int i = log_range.first; i + 1 < log_range.second; ++i)
     {
         GpsPoint const& prev = log[i];
         GpsPoint const& succ = log[i + 1];
@@ -54,7 +54,7 @@ vector<TimedCrossIndex> estimate_time(
         {
             double ms = ( succ.time - prev.time).total_milliseconds();
             double ems = 0;
-            for(auto e : path.entities)
+            for (auto e : path.entities)
             {
                 ems += boost::apply_visitor(TimeEstimater(map), e);
             }
@@ -102,7 +102,7 @@ vector<TimedCrossIndex> estimate_time(
                 }
             }
 
-            for(auto it = std::next(path.entities.begin()); it != path.entities.end(); ++it)
+            for (auto it = std::next(path.entities.begin()); it != path.entities.end(); ++it)
             {
                 if ( it->type() == typeid(ARoadSegment) )
                 {
@@ -153,14 +153,14 @@ vector<TimedCrossIndex> load_timed_path_from_DB(mysqlpp::Connection& con, int me
         q.parse();
         mysqlpp::StoreQueryResult stored_result = q.store(metaID);
         string time_str;
-        for(mysqlpp::Row const & r : stored_result)
+        for (mysqlpp::Row const & r : stored_result)
         {
             int cid = r[0];
             r[1].to_string(time_str);
             traj.push_back({cid, boost::posix_time::time_from_string(time_str)});
         }
     }
-    catch(exception const& e)
+    catch (exception const& e)
     {
         cerr << "error in " << __FUNCTION__ << ":" << e.what() << endl;
         throw;

@@ -27,8 +27,8 @@ std::vector<TimedCrossIndex> estimate_time(
 inline std::vector<TimedCrossIndex> estimate_time(
     std::vector<GpsPoint> const& log,
     std::vector<Path> const& paths,
-    RoadMap const& map){
-    return estimate_time(log, paths, {0, log.size()}, map);
+    RoadMap const& map) {
+	return estimate_time(log, paths, {0, log.size()}, map);
 }
 
 std::vector<TimedCrossIndex> load_timed_path_from_file(std::string const& file);

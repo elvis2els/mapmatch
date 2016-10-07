@@ -43,7 +43,7 @@ bool generateDefaultConfigFile(string const& name)
     {
         pt::write_ini(name, pt);
     }
-    catch(std::exception const& e)
+    catch (std::exception const& e)
     {
         cerr << "write default config file " << name << " fail.";
         cerr << e.what() << endl;
@@ -66,7 +66,7 @@ bool readIVMMParam(string const& name, IVMMParam& param)
         param.window = pt.get<int>("IVMM.window");
         param.factor = pt.get<double>("IVMM.factor");
     }
-    catch(std::exception const& e)
+    catch (std::exception const& e)
     {
         cerr << e.what();
         return false;
@@ -127,7 +127,7 @@ void doOutput(Output const* po, RoadMap const& /*map*/)
                 cerr << "[" << po->pinput->line << "]" << " error:" << err.what() << endl;
             }
         }
-        if( po->timed_path.size() == 1)
+        if ( po->timed_path.size() == 1)
         {
             fs::ofstream os(po->pinput->traj_output);
             if (!os)
@@ -145,7 +145,7 @@ void doOutput(Output const* po, RoadMap const& /*map*/)
         else
         {
             fs::path new_name;
-            for(int i = 0; i < po->timed_path.size(); ++i)
+            for (int i = 0; i < po->timed_path.size(); ++i)
             {
                 fs::path const& f = po->pinput->traj_output.filename();
                 new_name = dir / (f.stem().string() + "-" + to_string(i) + f.extension().string());
@@ -190,7 +190,7 @@ void writer(lf::queue<Output*>& outputQueue,
     while (! map_match_done )
     {
         Output * poutput;
-        if(outputQueue.pop(poutput) )
+        if (outputQueue.pop(poutput) )
         {
             doWith(poutput);
         }
@@ -213,7 +213,7 @@ void reader(
     string input, traj_output;//, shpOutput;
     long line = 0;
     cout << "first line is input path of gps log, second line is output path" << endl;
-    while(readLine(input, line))
+    while (readLine(input, line))
     {
         int inputLine = line;
         if ( !readLine(traj_output, line) ) break;
@@ -231,7 +231,7 @@ void reader(
         //pinput->shpOutput = fs::path(shpOutput);
         if ( pinput->log.size() > 5 )
         {
-            while(!inputQueue.push(pinput))
+            while (!inputQueue.push(pinput))
             {
                 b::this_thread::sleep(b::posix_time::millisec(50));
             }
@@ -245,7 +245,7 @@ void reader(
             } else {
                 poutput->type = Output::GpsTooLess;
             }
-            while(!outputQueue.push(poutput))
+            while (!outputQueue.push(poutput))
             {
                 b::this_thread::sleep(b::posix_time::millisec(100));
             }
@@ -272,7 +272,7 @@ void working(lf::queue<Input*> & inputQueue,
         }
         else
         {
-            for(auto & range : ranges)
+            for (auto & range : ranges)
             {
                 vector<TimedCrossIndex> timed_path = estimate_time(pinput->log, paths, range, ivmm.map());
                 if (! timed_path.empty())
@@ -284,7 +284,7 @@ void working(lf::queue<Input*> & inputQueue,
             poutput->cost = timer.elapsed();
         }
 
-        while(!outputQueue.push(poutput))
+        while (!outputQueue.push(poutput))
         {
             b::this_thread::sleep(b::posix_time::millisec(100));
         }
@@ -327,7 +327,7 @@ int main(int argc, char *argv[])
     {
         po::store(po::parse_command_line(argc, argv, desc), vm);
     }
-    catch(std::exception const& e)
+    catch (std::exception const& e)
     {
         if ( !vm.count("help") ) cerr << e.what() << endl;
         cout << desc << endl;
@@ -338,7 +338,7 @@ int main(int argc, char *argv[])
     {
         vm.notify();
     }
-    catch(std::exception const& e)
+    catch (std::exception const& e)
     {
         if ( !vm.count("help") ) cerr << e.what() << endl;
         cout << desc << endl;

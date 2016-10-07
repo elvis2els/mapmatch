@@ -8,7 +8,7 @@ class SimpleProgress
 {
 public:
     SimpleProgress(size_t total, double up = 0.1)
-        :_total(total),_cur(0),_update(up)
+        : _total(total), _cur(0), _update(up)
     {
     }
     void add()
@@ -59,10 +59,10 @@ public:
     }
 
 private:
-       size_t _total;
-       int _cur;
-       boost::timer _timer;
-       double _update;
+    size_t _total;
+    int _cur;
+    boost::timer _timer;
+    double _update;
 };
 
 #endif  /*SIMAPLE_PROGRESS_H*/

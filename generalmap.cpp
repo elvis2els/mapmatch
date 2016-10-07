@@ -1,78 +1,78 @@
 //auto-include {{{
 #include  <boost/range/algorithm.hpp>
 #include "generalmap.h"
-//}}} 
+//}}}
 using namespace std;
-void Map::index_(){
+void Map::index_() {
     cross_rtree = PointRTree(bgi::dynamic_quadratic(cross_.size()));
-    for(auto& c : cross_){
+    for (auto& c : cross_) {
         cross_rtree.insert({c.geometry, c.index});  //将所有路口号存入cross_rtree
     }
 
 
     roadsegment_rtree = RoadSegmentRTree(bgi::dynamic_quadratic(roadsegment_.size()));
-    for(auto& r : roadsegment_){
+    for (auto& r : roadsegment_) {
         Box bx = bg::return_envelope<Box>(r.geometry);  // 返回包含路段的矩形
         roadsegment_rtree.insert(make_pair(std::move(bx), r.index));
     }
 
     predecessor_road_.resize(cross_.size());
     successor_road_.resize(cross_.size());
-    for(auto& r : roadsegment_){
-        if ( r.direction & Forward ){   //1&1  3&1
+    for (auto& r : roadsegment_) {
+        if ( r.direction & Forward ) {  //1&1  3&1
             successor_road_[r.start_cross_index].push_back({r.index, r.end_cross_index}); //start路口后续路段，路段索引、end路口索引
             predecessor_road_[r.end_cross_index].push_back({r.index, r.start_cross_index});
         }
-        if ( r.direction & Backward ){
+        if ( r.direction & Backward ) {
             successor_road_[r.end_cross_index].push_back({r.index, r.start_cross_index});
             predecessor_road_[r.start_cross_index].push_back({r.index, r.end_cross_index});
         }
     }
 }
 
-void Map::build_graph(){
-    for(int i = 0; i < cross_.size(); ++i){
+void Map::build_graph() {
+    for (int i = 0; i < cross_.size(); ++i) {
         b::add_vertex(graph);   //b = boost 添加路口节点，仅有节点没有路段
     }
 
     GraphTraits::edge_descriptor edge;  //识别图中顶点
-    for(auto& r : roadsegment_){
-        if ( r.direction & Forward ){
-            road_edge_map_.insert({r.index, b::add_edge(r.start_cross_index, r.end_cross_index, r.index,graph).first});
+    for (auto& r : roadsegment_) {
+        if ( r.direction & Forward ) {
+            road_edge_map_.insert({r.index, b::add_edge(r.start_cross_index, r.end_cross_index, r.index, graph).first});
         }
-        if ( r.direction & Backward ){
-            road_edge_map_.insert({r.index, b::add_edge(r.end_cross_index, r.start_cross_index, r.index,graph).first});
+        if ( r.direction & Backward ) {
+            road_edge_map_.insert({r.index, b::add_edge(r.end_cross_index, r.start_cross_index, r.index, graph).first});
         }
     }
 }
 
-void Map::visit_roadsegment(std::function<void(RoadSegment const&r)> visitor)const{
+void Map::visit_roadsegment(std::function<void(RoadSegment const&r)> visitor)const {
     b::for_each(roadsegment_, visitor);
 }
 
-void Map::visit_roadsegment(std::function<void(RoadSegment &r)> visitor){
+void Map::visit_roadsegment(std::function<void(RoadSegment &r)> visitor) {
     b::for_each(roadsegment_, visitor);
 }
 
-void Map::visit_edge(std::function<void(RoadSegment const&r, GraphTraits::edge_descriptor, Graph const& g)> visitor)const{
-    for(auto p = b::edges(graph); p.first != p.second; ++p.first){
+void Map::visit_edge(std::function<void(RoadSegment const&r, GraphTraits::edge_descriptor, Graph const& g)> visitor)const {
+    for (auto p = b::edges(graph); p.first != p.second; ++p.first) {
         GraphTraits::edge_descriptor edge = *p.first;
         int road_idx = b::get(IndexOfEdge, graph, edge);
         visitor(roadsegment_[road_idx], edge, graph);
     }
 }
 
-void Map::visit_edge(std::function<void(RoadSegment &r, GraphTraits::edge_descriptor, Graph &)> visitor){
-    for(auto p = b::edges(graph); p.first != p.second; ++p.first){
+void Map::visit_edge(std::function<void(RoadSegment &r, GraphTraits::edge_descriptor, Graph &)> visitor) {
+    for (auto p = b::edges(graph); p.first != p.second; ++p.first) {
         GraphTraits::edge_descriptor edge = *p.first;
         int road_idx = b::get(IndexOfEdge, graph, edge);
         visitor(roadsegment_[road_idx], edge, graph);
     }
 }
 
-void Map::visit_cross(std::function<void(Cross const&)> visitor)const{
+void Map::visit_cross(std::function<void(Cross const&)> visitor)const {
     b::for_each(cross_, visitor);
 }
-void Map::visit_cross(std::function<void(Cross &)> visitor){
+void Map::visit_cross(std::function<void(Cross &)> visitor) {
     b::for_each(cross_, visitor);
 }

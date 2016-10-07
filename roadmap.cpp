@@ -35,7 +35,7 @@ double Path::total_length()const
         }
     };
 
-    for(auto & e : entities)
+    for (auto & e : entities)
     {
         d += b::apply_visitor(LengthGet(), e);
     }
@@ -61,7 +61,7 @@ vector<int> RoadMap::query_cross(Point const &p, double radious) const
         return a.second < b.second;
     });
 
-    for(auto & p : candidate)
+    for (auto & p : candidate)
     {
         ret.push_back(p.first);
     }
@@ -92,13 +92,13 @@ vector<int> RoadMap::query_road(Point const& p, double radious)const
 //    }
 
     //下面和上面注释掉那三段的结果应该是一致的, 获得查询范围内的box
-    for( pair<Box, int> const & pi :
+    for ( pair<Box, int> const & pi :
             roadsegment_rtree | bgi::adaptors::queried(bgi::intersects(box)))
     {
         roadIdx.insert(pi.second);
     }
 
-    for(int i : roadIdx)
+    for (int i : roadIdx)
     {
         RoadSegment const& r = roadsegment(i);
         double d = bg::comparable_distance(p, r.geometry);
@@ -111,7 +111,7 @@ vector<int> RoadMap::query_road(Point const& p, double radious)const
     {
         return a.second < b.second;
     });
-    for(auto & p : cand)
+    for (auto & p : cand)
     {
         ret.push_back(p.first);
     }
@@ -175,7 +175,7 @@ ProjectPoint make_project_point(Point const& point, RoadSegment const& r)
         pp.type = ProjectPoint::OnRoad;
         pp.index = r.index;
         pp.param = 0.0;
-        for(decltype(r.geometry.size()) i = 1; i < r.geometry.size(); ++i)
+        for (decltype(r.geometry.size()) i = 1; i < r.geometry.size(); ++i)
         {
             bg::model::referring_segment<Point const> segment(r.geometry[i - 1], r.geometry[i]);
             if ( bg::distance(segment, pp.geometry) < 1e-6) //projected point on segment
@@ -217,7 +217,7 @@ Linestring geometry(PartOfRoad const& pr, RoadSegment const& r)
         doSwap = true;
     }
     bool incP1 = false;
-    for(size_t i = 1; i < r.geometry.size(); ++i)
+    for (size_t i = 1; i < r.geometry.size(); ++i)
     {
         bg::model::referring_segment<Point const> seg(r.geometry[i - 1], r.geometry[i]);
         if ( !incP1 && bg::comparable_distance(p1, seg) < 1e-6)
@@ -295,7 +295,7 @@ Linestring geometry(Path const& path, RoadMap const& m)
 {
     Linestring line;
     GeometryAppend appender(m, line);
-    for(auto & v : path.entities)
+    for (auto & v : path.entities)
     {
         boost::apply_visitor(appender, v);
     }
@@ -339,12 +339,12 @@ vector<int> shortest_path_impl(
     unordered_set<RoadMap::GraphTraits::vertex_descriptor> close;
     unordered_map<RoadMap::GraphTraits::vertex_descriptor, RoadMap::GraphTraits::vertex_descriptor> pre;    //保存前一节点
     unordered_map<RoadMap::GraphTraits::vertex_descriptor, Heap::handle_type> savedHandle;  //保存open中的索引
-    for(vector<int>::size_type i = 0; i < init.size(); ++i)
+    for (vector<int>::size_type i = 0; i < init.size(); ++i)
     {
         savedHandle[init[i]] = open.push({init[i], initG[i], 0.0});
         pre[init[i]] = RoadMap::GraphTraits::null_vertex();
     }
-    while(!open.empty())
+    while (!open.empty())
     {
         AStarNode top = open.top();
         open.pop();
@@ -364,12 +364,12 @@ vector<int> shortest_path_impl(
         }
 
         close.insert(top.cross);
-        for(auto iterPair = b::out_edges(top.cross, map.graph); iterPair.first != iterPair.second; ++iterPair.first)    //访问图graph中点top.cross的所有出边
+        for (auto iterPair = b::out_edges(top.cross, map.graph); iterPair.first != iterPair.second; ++iterPair.first)   //访问图graph中点top.cross的所有出边
         {
             RoadMap::GraphTraits::edge_descriptor edge = *iterPair.first;
             RoadMap::GraphTraits::vertex_descriptor t = b::target(edge, map.graph);     //boost::target() returns the end point of a line
 //            if ( close.count(t) )
-            if(close.find(t) != close.end())
+            if (close.find(t) != close.end())
             {
                 continue;
             }
@@ -413,7 +413,7 @@ Path RoadMap::shortest_path_Astar(int crossA, int crossB)const
     {
         return bg::distance(this->cross(cross), this->cross(crossB));
     });
-    for(size_t i = 1; i < cross_index.size(); ++i)
+    for (size_t i = 1; i < cross_index.size(); ++i)
     {
         auto findedEdge = b::edge(cross_index[i - 1], cross_index[i], graph);
         assert(findedEdge.second);
@@ -437,8 +437,8 @@ Path RoadMap::shortest_path_Dijkstra(int crossA, int crossB)const
     }
 
     vector<int> crossIndex =
-        shortest_path_impl(*this, {crossA}, {0.0}, {crossB}, [](int){ return 0.0; });
-    for(size_t i = 1; i < crossIndex.size(); ++i)
+    shortest_path_impl(*this, {crossA}, {0.0}, {crossB}, [](int) { return 0.0; });
+    for (size_t i = 1; i < crossIndex.size(); ++i)
     {
         auto findedEdge = b::edge(crossIndex[i - 1], crossIndex[i], graph);
         assert(findedEdge.second);
@@ -534,7 +534,7 @@ Path RoadMap::shortest_path(ProjectPoint const& start, ProjectPoint const& end) 
         if (start.index == end.index) //On Same Road
         {
             RoadSegment const& r = roadsegment(start.index);
-            if(startCanGoToEndDirectly(start, end, r))
+            if (startCanGoToEndDirectly(start, end, r))
             {
                 Path p;
                 p.entities.push_back(make_part_of_road(start, end, r));
@@ -558,13 +558,13 @@ Path RoadMap::shortest_path(ProjectPoint const& start, ProjectPoint const& end) 
             vector<PartOfRoad> part_of_road_s;
             vector<PartOfRoad> part_of_road_e;
             vector<double> initG;
-            for(auto v : start_possible_cross)
+            for (auto v : start_possible_cross)
             {
                 part_of_road_s.push_back(make_part_of_road(start , cross(v), roadsegment(start.index)));
                 initG.push_back(part_of_road_s.back().length);
             }
             unordered_map<int, double> endG;
-            for(auto v : end_possible_cross)
+            for (auto v : end_possible_cross)
             {
                 part_of_road_e.push_back(make_part_of_road(cross(v), end, roadsegment(end.index)));
                 endG[v] = part_of_road_e.back().length;
@@ -575,7 +575,7 @@ Path RoadMap::shortest_path(ProjectPoint const& start, ProjectPoint const& end) 
                                    [&](int v)
             {
 //                if ( endG.count(v) )
-                if(endG.find(v) != endG.end())
+                if (endG.find(v) != endG.end())
                 {
                     return endG[v];
                 }
@@ -590,7 +590,7 @@ Path RoadMap::shortest_path(ProjectPoint const& start, ProjectPoint const& end) 
             });
             if ( !cross_index.empty() )
             {
-                for(vector<int>::size_type i = 1; i < cross_index.size(); ++i)
+                for (vector<int>::size_type i = 1; i < cross_index.size(); ++i)
                 {
                     auto findedEdge = b::edge(cross_index[i - 1], cross_index[i], graph);       //If an edge from vertex u to vertex v exists, return a pair containing one such edge and true.
                     assert(findedEdge.second);
@@ -630,7 +630,7 @@ Path RoadMap::shortest_path(ProjectPoint const& start, int end)const
         vector<int> start_possible_cross = possible_start_nearby_cross(start, rs);
         vector<PartOfRoad> part_of_road_s;
         vector<double> initG;
-        for(auto v : start_possible_cross)
+        for (auto v : start_possible_cross)
         {
             part_of_road_s.push_back(make_part_of_road(start, cross(v), roadsegment(start.index)));
             initG.push_back(part_of_road_s.back().length);
@@ -651,7 +651,7 @@ Path RoadMap::shortest_path(ProjectPoint const& start, int end)const
         });
         if ( !cross_index.empty() )
         {
-            for(size_t i = 1; i < cross_index.size(); ++i)
+            for (size_t i = 1; i < cross_index.size(); ++i)
             {
                 auto findedEdge = b::edge(cross_index[i - 1], cross_index[i], graph);
                 assert(findedEdge.second);
@@ -694,7 +694,7 @@ Path RoadMap::shortest_path(int start, ProjectPoint const& end)const
         vector<int> end_possible_cross = possible_end_nearby_cross(end, re);
         vector<PartOfRoad> part_of_road_e;
         unordered_map<int, double> endG;
-        for(auto v : end_possible_cross)
+        for (auto v : end_possible_cross)
         {
             part_of_road_e.push_back(make_part_of_road(cross(v), end, roadsegment(end.index)));
             endG[v] = part_of_road_e.back().length;
@@ -718,7 +718,7 @@ Path RoadMap::shortest_path(int start, ProjectPoint const& end)const
         });
         if ( !cross_index.empty() )
         {
-            for(size_t i = 1; i < cross_index.size(); ++i)
+            for (size_t i = 1; i < cross_index.size(); ++i)
             {
                 auto findedEdge = b::edge(cross_index[i - 1], cross_index[i], graph);
                 assert(findedEdge.second);

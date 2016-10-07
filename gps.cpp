@@ -3,14 +3,14 @@
 #include "gps.h"
 using namespace std;
 
-vector<GpsPoint> load_from_file(std::string const & name){
+vector<GpsPoint> load_from_file(std::string const & name) {
     vector<GpsPoint> ret;
     ifstream ifs(name);
     ifs.imbue(locale(ifs.getloc(), new boost::posix_time::time_input_facet("%Y-%m-%d %H:%M:%S")));
     double x;
     double y;
     boost::posix_time::ptime ptime;
-    if ( ifs){
+    if ( ifs) {
 //        while ( ifs.ignore(1024, ',') &&
 //                ifs >> ptime &&
 //                ifs.ignore(),
@@ -22,13 +22,13 @@ vector<GpsPoint> load_from_file(std::string const & name){
 //            ret.push_back(p);
 //        }
         while (
-                ifs >> ptime &&
-                ifs.ignore(),
-                ifs >> x && ifs.ignore() &&
-                ifs >> y && ifs.ignore() &&
-                ifs.ignore(1024, '\n')){
+            ifs >> ptime &&
+            ifs.ignore(),
+            ifs >> x && ifs.ignore() &&
+            ifs >> y && ifs.ignore() &&
+            ifs.ignore(1024, '\n')) {
             //去重
-            if(!ret.empty() && ret.back().geometry.x() == x && ret.back().geometry.y() == y)
+            if (!ret.empty() && ret.back().geometry.x() == x && ret.back().geometry.y() == y)
                 continue;
             GpsPoint p(x, y, ptime);
             ret.push_back(p);

@@ -10,7 +10,7 @@
 // Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
-// edit by syhkiller@163.com, the template file is 
+// edit by syhkiller@163.com, the template file is
 // boost/geometry/strategies/cartesian/distance_projected_point_ax.hpp
 
 // Parts of Boost.Geometry are redesigned from Geodan's Geographic Library
@@ -49,11 +49,13 @@
 #include <boost/geometry/geometries/point.hpp>
 
 
-namespace boost { namespace geometry
+namespace boost {
+namespace geometry
 {
 
 
-namespace strategy { namespace distance
+namespace strategy {
+namespace distance
 {
 
 
@@ -62,17 +64,17 @@ namespace detail
 {
 
 template <typename T, typename P>
-struct projected_point_return_result{
+struct projected_point_return_result {
     typedef T value_type;
     T distance;
     P point;
-    std::pair<T&, P&> to_pair(){
+    std::pair<T&, P&> to_pair() {
         return { distance, point};
     }
-    std::pair<T const&, P const&> to_pair()const{
+    std::pair<T const&, P const&> to_pair()const {
         return {distance, point};
     }
-    projected_point_return_result(T const& c = T(0)):distance(c){}
+    projected_point_return_result(T const& c = T(0)): distance(c) {}
 
     friend inline bool operator<(projected_point_return_result const& left,
                                  projected_point_return_result const& right)
@@ -81,7 +83,7 @@ struct projected_point_return_result{
     }
 
     friend inline bool operator==(projected_point_return_result const& left,
-            projected_point_return_result const& right){
+                                  projected_point_return_result const& right) {
         return left.distance == right.distance;
     }
 };
@@ -92,7 +94,7 @@ class projected_point_return_result_less
 public:
     inline bool operator()(Distance const& left, Distance const& right) const
     {
-       return left < right;
+        return left < right;
     }
 };
 
@@ -100,24 +102,24 @@ template
 <
     typename CalculationType = void,
     typename Strategy = pythagoras<CalculationType>
->
+    >
 class projected_point_return_point
 {
 public :
     template <typename Point, typename PointOfSegment>
     struct calculation_type
         : public projected_point<CalculationType, Strategy>
-            ::template calculation_type<Point, PointOfSegment>
+          ::template calculation_type<Point, PointOfSegment>
     {};
 
     template <typename Point, typename PointOfSegment>
     struct result_type
     {
         typedef projected_point_return_result
-                    <
-                        typename calculation_type<Point, PointOfSegment>::type,
-                        Point
-                    > type;
+        <
+        typename calculation_type<Point, PointOfSegment>::type,
+                 Point
+                 > type;
     };
 
 public :
@@ -133,11 +135,11 @@ public :
         // A projected point of points in Integer coordinates must be able to be
         // represented in FP.
         typedef model::point
-            <
-                calculation_type,
-                dimension<PointOfSegment>::value,
-                typename coordinate_system<PointOfSegment>::type
-            > fp_point_type;
+        <
+        calculation_type,
+        dimension<PointOfSegment>::value,
+        typename coordinate_system<PointOfSegment>::type
+        > fp_point_type;
 
         // For convenience
         typedef fp_point_type fp_vector_type;
@@ -212,7 +214,7 @@ template <typename CalculationType, typename Strategy, typename P, typename PS>
 struct return_type<detail::projected_point_return_point<CalculationType, Strategy>, P, PS>
 {
     typedef typename detail::projected_point_return_point<CalculationType, Strategy>
-                        ::template result_type<P, PS>::type type;
+    ::template result_type<P, PS>::type type;
 };
 
 
@@ -222,10 +224,10 @@ struct comparable_type<detail::projected_point_return_point<CalculationType, Str
     // Define a projected_point strategy with its underlying point-point-strategy
     // being comparable
     typedef detail::projected_point_return_point
-        <
-            CalculationType,
-            typename comparable_type<Strategy>::type
-        > type;
+    <
+    CalculationType,
+    typename comparable_type<Strategy>::type
+    > type;
 };
 
 
@@ -233,9 +235,9 @@ template <typename CalculationType, typename Strategy>
 struct get_comparable<detail::projected_point_return_point<CalculationType, Strategy> >
 {
     typedef typename comparable_type
-        <
-            detail::projected_point_return_point<CalculationType, Strategy>
-        >::type comparable_type;
+    <
+    detail::projected_point_return_point<CalculationType, Strategy>
+    >::type comparable_type;
 public :
     static inline comparable_type apply(detail::projected_point_return_point<CalculationType, Strategy> const& )
     {
@@ -269,12 +271,14 @@ template
 <
     typename CalculationType = void,
     typename Strategy = pythagoras<CalculationType>
->
+    >
 using projected_point_return_point = detail::projected_point_return_point<CalculationType, Strategy> ;
 
-}} // namespace strategy::distance
+}
+} // namespace strategy::distance
 
 
-}} // namespace boost::geometry
+}
+} // namespace boost::geometry
 
 #endif // BOOST_GEOMETRY_STRATEGIES_CARTESIAN_DISTANCE_PROJECTED_POINT_RETURN_POINT_HPP
