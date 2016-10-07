@@ -26,7 +26,7 @@ struct IVMMParam {
     double project_dist_stddev;
     double beta;
     int window;
-    double b; //道路加权限速值*一个系数
+    double factor; //道路加权限速值*一个系数
     static boost::optional<IVMMParam> load_config(std::string const& filename);
 };
 
