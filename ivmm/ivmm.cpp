@@ -268,9 +268,12 @@ double IVMM::find_sequence(
                     if (initFocusf[srcCand] != -oo)
                         hasTurePath = true;
                 }
-                if (f[srcCand] == -oo)  //忽略不可达的候选点
-                    continue;
-                hasTurePath = true;
+                else
+                {
+                    if (f[srcCand] == -oo)  //忽略不可达的候选点
+                        continue;
+                    hasTurePath = true;
+                }
 
                 //获取src和des两候选点所在路段的限速
                 RoadSegment const& srcRs = map_->roadsegment(candidates[srcGps][srcCand].point.index);
@@ -287,7 +290,7 @@ double IVMM::find_sequence(
 #endif
 
                 if (detail.avg_speed != 0 && !(candidates[destGps].size() == 1 && f.size() == 1))  //同一个点和两点之间只有唯一路径的就不要考虑了
-                    if (fst < 5.0e-05)  //忽略边权值太小的候选点
+                    if (fst < 5.0e-06)  //忽略边权值太小的候选点
                     {
 #ifdef QT_QML_DEBUG
                         cout << "fst is too small: " << fst << endl;
@@ -564,9 +567,10 @@ bool IVMM::map_match(vector<GpsPoint> const& log,
     }*/
 
 #ifdef QT_QML_DEBUG
+    int idx = 0;
     cout << "finalCand: ";
     for (auto n : finalCand)
-        cout << n << "->";
+        cout << idx++ << ":" << n << "->";
     cout << endl;
 #endif
 
