@@ -207,7 +207,7 @@ void writer(lf::queue<Output*>& outputQueue,
 }
 
 void reader(
-    lf::queue<Input*> &inputQueue,
+    lf::queue<Input*, lf::fixed_sized<true>> &inputQueue,
     lf::queue<Output*> &outputQueue)
 {
     string input, traj_output;//, shpOutput;
@@ -216,6 +216,7 @@ void reader(
     while (readLine(input, line))
     {
         int inputLine = line;
+//        cout<<"inputLine: "<<inputLine<<endl;
         if ( !readLine(traj_output, line) ) break;
         /*
         if (withShp){
@@ -233,7 +234,8 @@ void reader(
         {
             while (!inputQueue.push(pinput))
             {
-                b::this_thread::sleep(b::posix_time::millisec(50));
+//                cerr<<"sleep********inputLine: "<<inputLine<<endl;
+                b::this_thread::sleep(b::posix_time::seconds(10));
             }
         }
         else
@@ -253,7 +255,7 @@ void reader(
     }
 }
 
-void working(lf::queue<Input*> & inputQueue,
+void working(lf::queue<Input*, lf::fixed_sized<true>> & inputQueue,
              lf::queue<Output*> & outputQueue,
              IVMM const& ivmm,
              atomic_bool const& read_done)
@@ -384,7 +386,7 @@ int main(int argc, char *argv[])
     cout << "IVMM.window = " << param.window << endl;
     cout << "IVMM.factor = " << param.factor << endl;
     IVMM ivmm(&bjRoadMap, param);
-    lf::queue<Input*> inputQueue(10000);
+    lf::queue<Input*, lf::fixed_sized<true>> inputQueue(10000);
     lf::queue<Output*> outputQueue(100);
     atomic_bool read_done(false);
     atomic_bool map_match_done(false);
@@ -398,26 +400,13 @@ int main(int argc, char *argv[])
     }
     else
     {
-//        b::thread read_thread(b::bind(reader,
-//                                      b::ref(inputQueue),
-//                                      b::ref(outputQueue)));
         b::thread read_thread(bind(reader, ref(inputQueue), ref(outputQueue)));
         b::thread_group working_threads;
         for (int i = 0; i < j; ++i)
         {
-//            working_threads.create_thread(
-//                b::bind(working,
-//                        b::ref(inputQueue),
-//                        b::ref(outputQueue),
-//                        b::cref(ivmm),
-//                        b::cref(read_done)));
             working_threads.create_thread(bind(working, ref(inputQueue), ref(outputQueue), cref(ivmm), cref(read_done)));
         }
-//        b::thread write_thread(
-//            b::bind(writer,
-//                    b::ref(outputQueue),
-//                    b::cref(bjRoadMap),
-//                    b::cref(map_match_done)));
+
         b::thread write_thread(bind(writer, ref(outputQueue), cref(bjRoadMap), cref(map_match_done)));
         read_thread.join();
         read_done = true;
