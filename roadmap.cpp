@@ -76,22 +76,7 @@ vector<int> RoadMap::query_road(Point const& p, double radious)const
     vector<pair<int, double> > cand;
     set<int> roadIdx;
     double rad2 = radious * radious;
-//    for( pair<Box, int> const& pi :
-//            roadsegment_rtree | bgi::adaptors::queried(bgi::covers(box))){
-//        roadIdx.insert(pi.second);
-//    }
 
-//    for( pair<Box, int> const& pi :
-//            roadsegment_rtree | bgi::adaptors::queried(bgi::covered_by(box))){
-//        roadIdx.insert(pi.second);
-//    }
-
-//    for( pair<Box, int> const& pi :
-//            roadsegment_rtree | bgi::adaptors::queried(bgi::overlaps(box))){
-//        roadIdx.insert(pi.second);
-//    }
-
-    //下面和上面注释掉那三段的结果应该是一致的, 获得查询范围内的box
     for ( pair<Box, int> const & pi :
             roadsegment_rtree | bgi::adaptors::queried(bgi::intersects(box)))
     {
